@@ -75,7 +75,7 @@
       </a>
 
       <div class="sidebar-section-label">Health</div>
-      <a href="#" class="sidebar-item" id="nav-prescriptions" onclick="Toast.info('Coming Soon', 'This module will be available in V2.')">
+      <a href="prescriptions.html" class="sidebar-item" id="nav-prescriptions">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4M7 3h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z"/></svg>
         Prescriptions
       </a>
@@ -116,7 +116,7 @@
         </button>
         <div class="topbar-search">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-          <input type="text" placeholder="Search doctors, appointments...">
+          <input type="text" id="global-search" placeholder="Search doctors, appointments..." onkeypress="if(event.key === 'Enter' && this.value) { window.location.href='book.html?q='+encodeURIComponent(this.value); }">
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:12px;">

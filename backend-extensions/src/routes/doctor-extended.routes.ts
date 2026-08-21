@@ -115,4 +115,45 @@ router.post("/appointments/:id/notes", authenticate, requireRole(["DOCTOR"]), as
   }
 });
 
+// ——————————————————————————————————————
+// GET /api/doctor/prescriptions  — list prescriptions issued by this doctor
+// ——————————————————————————————————————
+router.get("/prescriptions", authenticate, requireRole(["DOCTOR"]), async (req: AuthRequest, res): Promise<void> => {
+  try {
+    const apts = await prisma.appointment.findMany({
+      where: { doctorId: req.user!.id, status: "COMPLETED" },
+      select: { id: true, postVisitNotes: true, appointmentDate: true, patient: { select: { name: true } } },
+      orderBy: { appointmentDate: "desc" }
+    });
+
+    const prescriptions = apts
+      .filter(a => a.postVisitNotes)
+      .map(a => {
+        const notes = a.postVisitNotes || "";
+        const matchName = notes.match(/(?:prescribed|take|medication)[\s:]+([A-Z][a-z]+ \d+mg)/i);
+        const matchDosage = notes.match(/(\d+mg)/i);
+        
+        let freq = "Daily";
+        if (/twice daily/i.test(notes))  freq = "Twice daily";
+        else if (/once daily/i.test(notes))   freq = "Once daily";
+        else if (/thrice daily/i.test(notes)) freq = "Three times daily";
+        else if (/bedtime/i.test(notes))      freq = "Bedtime";
+
+        return {
+          id:        a.id,
+          name:      matchName ? matchName[1] : "Prescribed medication",
+          dosage:    matchDosage ? matchDosage[1] : "As prescribed",
+          frequency: freq,
+          date:      a.appointmentDate,
+          patientName: (a.patient as any).name,
+        };
+      });
+
+    res.json({ data: prescriptions });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 export default router;

@@ -80,6 +80,7 @@ const api = {
     get:          (id)          => get(`/doctors/${id}`, false),
     availability: (id, date)    => get(`/doctors/${id}/availability?date=${date}`, false),
     setLeave:     (id, dates)   => post(`/doctors/${id}/leave`, { dates }),
+    prescriptions:()            => get('/doctor/prescriptions'),
     // Admin only
     create:       (payload)     => post('/admin/doctors', payload),
     update:       (id, payload) => put(`/admin/doctors/${id}`, payload),

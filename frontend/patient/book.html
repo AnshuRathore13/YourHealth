@@ -363,9 +363,19 @@
       const res = await api.doctors.list();
       allDoctors = res.data || res || [];
       renderDoctors(allDoctors);
+      const q = new URLSearchParams(window.location.search).get('q');
+      if (q) {
+        document.getElementById('doctor-search').value = q;
+        filterDoctors();
+      }
     } catch {
       allDoctors = MOCK_DOCTORS;
       renderDoctors(MOCK_DOCTORS);
+      const q = new URLSearchParams(window.location.search).get('q');
+      if (q) {
+        document.getElementById('doctor-search').value = q;
+        filterDoctors();
+      }
     }
   }
 

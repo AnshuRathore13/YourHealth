@@ -16,7 +16,7 @@ router.get("/appointments", authenticate, requireRole(["PATIENT"]), async (req: 
     const apts = await prisma.appointment.findMany({
       where,
       include: {
-        doctor: { include: { user: { select: { name: true } } } }
+        doctor: { include: { doctorProfile: true } }
       },
       orderBy: [{ appointmentDate: "asc" }]
     });
@@ -24,8 +24,8 @@ router.get("/appointments", authenticate, requireRole(["PATIENT"]), async (req: 
     const shaped = apts.map(a => ({
       id:              a.id,
       datetime:        `${a.appointmentDate}T${a.timeSlot}:00`,
-      doctorName:      (a as any).doctor?.user?.name || "",
-      specialisation:  (a as any).doctor?.specialization || "General",
+      doctorName:      (a as any).doctor?.name || "",
+      specialisation:  (a as any).doctor?.doctorProfile?.specialization || "General",
       status:          a.status.toLowerCase(),
       urgency:         (a as any).urgencyLevel || "Low",
       preVisitSummary: a.preVisitSummary || "",
@@ -34,6 +34,7 @@ router.get("/appointments", authenticate, requireRole(["PATIENT"]), async (req: 
 
     res.json({ data: shaped });
   } catch (error) {
+    console.error("GET /patient/appointments error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
