@@ -205,7 +205,7 @@
 
   async function loadSchedule() {
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const today = new Date().toLocaleDateString('en-CA');
       const res = await api.doctor.schedule(today);
       const list = res.data || res || [];
       renderQueue(list);
@@ -302,7 +302,7 @@
     let html = '';
     for (let i = 0; i < 14; i++) {
       const d = new Date(today); d.setDate(today.getDate() + i);
-      const key = d.toISOString().split('T')[0];
+      const key = d.toLocaleDateString('en-CA');
       const isMarked = leaveDays.has(key);
       html += `<div class="leave-day ${isMarked?'marked':''}" onclick="toggleLeave('${key}',this)" title="${key}">${d.getDate()}<br><span style="font-size:0.55rem;font-weight:500;">${d.toLocaleDateString('en-IN',{month:'short'})}</span></div>`;
     }

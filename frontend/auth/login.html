@@ -211,7 +211,7 @@
 
   <!-- Role selector -->
   <div class="role-tabs" id="role-tabs">
-    <div class="role-tab active" data-role="patient" onclick="selectRole('patient')">🧑‍⚕️ Patient</div>
+    <div class="role-tab active" data-role="patient" onclick="selectRole('patient')">👤 Patient</div>
     <div class="role-tab"        data-role="doctor"  onclick="selectRole('doctor')">👨‍⚕️ Doctor</div>
     <div class="role-tab"        data-role="admin"   onclick="selectRole('admin')">🛡️ Admin</div>
   </div>
@@ -220,24 +220,24 @@
   <p class="auth-subtitle" id="auth-subtitle">Sign in to your patient portal</p>
 
   <form class="auth-form" id="login-form" onsubmit="handleLogin(event)">
-    <div class="form-group">
+    <div class="form-group" id="email-group">
       <label class="form-label" for="email">Email Address</label>
       <input class="form-input" type="email" id="email" name="email" placeholder="you@example.com" required autocomplete="email">
     </div>
 
-    <div class="form-group">
-      <label class="form-label" for="password">Password</label>
+    <div class="form-group" id="password-group">
+      <label class="form-label" id="password-label" for="password">Password</label>
       <div style="position:relative;">
         <input class="form-input" type="password" id="password" name="password" placeholder="••••••••" required autocomplete="current-password" style="padding-right:48px;">
         <button type="button" onclick="togglePassword()" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-3);cursor:pointer;font-size:1rem;" id="eye-btn">👁️</button>
       </div>
     </div>
 
-    <div style="display:flex;align-items:center;justify-content:space-between;">
+    <div style="display:flex;align-items:center;justify-content:space-between;" id="remember-row">
       <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.83rem;color:var(--text-2);">
         <input type="checkbox" id="remember" style="accent-color:var(--accent);width:14px;height:14px;"> Remember me
       </label>
-      <a href="#" style="font-size:0.83rem;color:var(--accent);font-weight:600;">Forgot password?</a>
+      <a href="#" onclick="showForgotPassword(event)" style="font-size:0.83rem;color:var(--accent);font-weight:600;">Forgot password?</a>
     </div>
 
     <button type="submit" class="btn btn-primary w-full" id="login-btn" style="justify-content:center;padding:14px;">
@@ -345,6 +345,71 @@
   // Mobile: show logo
   if (window.innerWidth <= 768) {
     document.getElementById('mobile-logo').style.display = 'flex';
+  }
+
+  // —————————————————————————————————————————————————————————
+  // FORGOT / RESET PASSWORD FLOW
+  // —————————————————————————————————————————————————————————
+  let currentMode = 'login'; // 'login', 'forgot', 'reset'
+  const resetToken = new URLSearchParams(window.location.search).get('reset_token');
+
+  if (resetToken) {
+    currentMode = 'reset';
+    document.getElementById('role-tabs').style.display = 'none';
+    document.getElementById('email-group').style.display = 'none';
+    document.getElementById('remember-row').style.display = 'none';
+    document.getElementById('auth-title').textContent = 'Set New Password';
+    document.getElementById('auth-subtitle').textContent = 'Enter your new password below';
+    document.getElementById('password-label').textContent = 'New Password';
+    document.getElementById('login-btn').textContent = 'Update Password';
+    document.getElementById('login-form').onsubmit = handleResetPassword;
+    document.getElementById('email').removeAttribute('required');
+  }
+
+  function showForgotPassword(e) {
+    e.preventDefault();
+    currentMode = 'forgot';
+    document.getElementById('password-group').style.display = 'none';
+    document.getElementById('remember-row').style.display = 'none';
+    document.getElementById('auth-title').textContent = 'Reset Password';
+    document.getElementById('auth-subtitle').textContent = 'Enter your email to receive a reset link';
+    document.getElementById('login-btn').textContent = 'Send Reset Link';
+    document.getElementById('login-form').onsubmit = handleForgotPassword;
+    document.getElementById('password').removeAttribute('required');
+  }
+
+  async function handleForgotPassword(e) {
+    e.preventDefault();
+    const btn = document.getElementById('login-btn');
+    Loader.show(btn, 'Sending...');
+    hideError();
+    try {
+      const email = document.getElementById('email').value;
+      const res = await api.auth.forgotPassword(email);
+      Toast.success('Email Sent', res.message || 'Check your inbox for the reset link.');
+      setTimeout(() => window.location.href = 'login.html', 3000);
+    } catch (err) {
+      showError(err.message);
+    } finally {
+      Loader.hide(btn);
+    }
+  }
+
+  async function handleResetPassword(e) {
+    e.preventDefault();
+    const btn = document.getElementById('login-btn');
+    Loader.show(btn, 'Updating...');
+    hideError();
+    try {
+      const password = document.getElementById('password').value;
+      const res = await api.auth.resetPassword(resetToken, password);
+      Toast.success('Password Reset', res.message || 'You can now log in.');
+      setTimeout(() => window.location.href = 'login.html', 2000);
+    } catch (err) {
+      showError(err.message);
+    } finally {
+      Loader.hide(btn);
+    }
   }
 </script>
 </body>

@@ -29,7 +29,8 @@ router.get("/appointments", authenticate, requireRole(["PATIENT"]), async (req: 
 
     const shaped = apts.map(a => ({
       id:              a.id,
-      datetime:        `${a.appointmentDate}T${a.timeSlot}:00`,
+      appointmentDate: a.appointmentDate,
+      timeSlot:        a.timeSlot,
       doctorName:      (a as any).doctor?.name || "",
       specialisation:  (a as any).doctor?.doctorProfile?.specialization || "General",
       status:          a.status.toLowerCase(),

@@ -168,18 +168,18 @@
     let scheduleData = {};
     try {
       for (const d of dates) {
-        const key = d.toISOString().split('T')[0];
+        const key = d.toLocaleDateString('en-CA');
         const res = await api.doctor.schedule(key);
         scheduleData[key] = res.data || res || [];
       }
     } catch {
       // Use mock
-      const todayKey = today.toISOString().split('T')[0];
+      const todayKey = today.toLocaleDateString('en-CA');
       scheduleData[todayKey] = MOCK_SCHEDULE;
     }
 
     grid.innerHTML = dates.map((d, i) => {
-      const key = d.toISOString().split('T')[0];
+      const key = d.toLocaleDateString('en-CA');
       const apts = scheduleData[key] || [];
       const isToday = d.toDateString() === today.toDateString();
       return `

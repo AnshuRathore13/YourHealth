@@ -467,8 +467,31 @@
     document.getElementById('slot-continue-btn').disabled = true;
 
     try {
-      const res = await api.doctors.availability(selectedDoctor.id, date.toISOString().split('T')[0]);
-      renderSlots(res.slots || res || []);
+      const getLocalDateStr = (d) => {
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+      };
+      const dateStr = getLocalDateStr(date);
+      
+      const [docRes, patRes] = await Promise.all([
+        api.doctors.availability(selectedDoctor.id, dateStr),
+        api.patient.appointments('upcoming').catch(() => ({ data: [] }))
+      ]);
+      
+      const slots = docRes.slots || docRes || [];
+      const patientBusyTimes = patRes.data
+        .filter(a => a.appointmentDate === dateStr)
+        .map(a => a.timeSlot);
+
+      slots.forEach(s => {
+        if (patientBusyTimes.includes(s.time)) {
+          s.booked = true;
+          s.patientConflict = true;
+        }
+      });
+      renderSlots(slots);
     } catch {
       renderSlots(MOCK_SLOTS);
     }
@@ -480,9 +503,24 @@
       el.innerHTML = `<div style="color:var(--text-3);font-size:0.85rem;padding:16px 0;">No slots available on this date.</div>`;
       return;
     }
-    el.innerHTML = `<div class="slot-grid">${slots.map(s => `
-      <div class="slot ${s.booked ? 'slot-booked' : ''}" onclick="${s.booked ? '' : `selectSlot('${s.time}',this)`}">${s.time}</div>
-    `).join('')}</div>`;
+    el.innerHTML = `<div class="slot-grid">${slots.map(s => {
+      let clickAction = `selectSlot('${s.time}',this)`;
+      if (s.booked) {
+        let msgTitle = 'Unavailable';
+        let msgBody = 'This slot is already booked by another patient.';
+        
+        if (s.passed) {
+          msgTitle = 'Time Passed';
+          msgBody = 'This time slot is in the past and can no longer be booked.';
+        } else if (s.patientConflict) {
+          msgTitle = 'Schedule Conflict';
+          msgBody = 'You already have an appointment booked at this time.';
+        }
+        
+        clickAction = `Toast.warning('${msgTitle}', '${msgBody}')`;
+      }
+      return `<div class="slot ${s.booked ? 'slot-booked' : ''}" onclick="${clickAction}">${s.time}</div>`;
+    }).join('')}</div>`;
   }
 
   function selectSlot(time, el) {
@@ -593,9 +631,15 @@
     const btn = document.getElementById('confirm-btn');
     Loader.show(btn, 'Booking...');
     try {
+      const getLocalDateStr = (d) => {
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+      };
       const res = await api.appointments.book({
         doctorId:       selectedDoctor.id,
-        date:           selectedDate.toISOString().split('T')[0],
+        date:           getLocalDateStr(selectedDate),
         time:           selectedSlot,
         symptoms:       document.getElementById('symptoms-text').value,
         preVisitSummary: aiSummaryData?.summary,
@@ -604,9 +648,7 @@
       Toast.success('Booked! 🎉', 'Confirmation email sent. Calendar event created.');
       setTimeout(() => window.location.href = 'appointments.html', 1500);
     } catch (err) {
-      // Demo: show success anyway
-      Toast.success('Demo Booked! 🎉', 'In production, this would book via the API. Redirecting...');
-      setTimeout(() => window.location.href = 'appointments.html', 2000);
+      Toast.error('Booking Failed', err.message || 'Could not complete booking.');
     } finally {
       Loader.hide(btn);
     }

@@ -22,7 +22,8 @@ router.get("/schedule", authenticate, requireRole(["DOCTOR"]), async (req: AuthR
 
     const shaped = apts.map(a => ({
       id:              a.id,
-      datetime:        `${a.appointmentDate}T${a.timeSlot}:00`,
+      appointmentDate: a.appointmentDate,
+      timeSlot:        a.timeSlot,
       patientName:     (a as any).patient?.name || "",
       patientEmail:    (a as any).patient?.email || "",
       status:          a.status.toLowerCase(),
@@ -114,5 +115,50 @@ router.post("/appointments/:id/notes", authenticate, requireRole(["DOCTOR"]), as
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+// ——————————————————————————————————————
+// GET /api/doctor/prescriptions
+// ——————————————————————————————————————
+router.get("/prescriptions", authenticate, requireRole(["DOCTOR"]), async (req: AuthRequest, res): Promise<void> => {
+  try {
+    const apts = await prisma.appointment.findMany({
+      where: { doctorId: req.user!.id, status: "COMPLETED" },
+      select: { id: true, postVisitNotes: true, appointmentDate: true, patient: { select: { name: true } } },
+      orderBy: { appointmentDate: "desc" }
+    });
+
+    const prescriptions = apts
+      .filter(a => a.postVisitNotes)
+      .map(a => ({
+        id:          a.id,
+        patientName: a.patient.name,
+        name:        extractMedName(a.postVisitNotes || ""),
+        dosage:      extractDosage(a.postVisitNotes || ""),
+        frequency:   extractFrequency(a.postVisitNotes || ""),
+        date:        a.appointmentDate,
+      }));
+
+    res.json({ data: prescriptions });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+function extractMedName(notes: string): string {
+  const match = notes.match(/(?:prescribed|take|medication)[\s:]+([A-Z][a-z]+ \d+mg)/i);
+  return match ? match[1] : "Prescribed medication";
+}
+function extractDosage(notes: string): string {
+  const match = notes.match(/(\d+mg)/i);
+  return match ? match[1] : "As prescribed";
+}
+function extractFrequency(notes: string): string {
+  if (/twice daily/i.test(notes))  return "Twice daily";
+  if (/once daily/i.test(notes))   return "Once daily";
+  if (/thrice daily/i.test(notes)) return "Three times daily";
+  if (/bedtime/i.test(notes))      return "Bedtime";
+  return "Daily";
+}
 
 export default router;

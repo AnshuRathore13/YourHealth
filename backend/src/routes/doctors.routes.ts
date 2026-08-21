@@ -106,7 +106,15 @@ router.get("/:id/availability", async (req, res): Promise<void> => {
         const ampm  = h24 >= 12 ? "PM" : "AM";
         const h12   = ((h24 % 12) || 12).toString().padStart(2, "0");
         const label = `${h12}:${min} ${ampm}`;
-        slots.push({ time: label, booked: bookedTimes.includes(raw) });
+        
+        const slotDate = new Date(`${date}T${raw}:00`);
+        const isPassed = slotDate < new Date();
+        
+        slots.push({ 
+          time: label, 
+          booked: isPassed || bookedTimes.includes(label) || bookedTimes.includes(raw),
+          passed: isPassed
+        });
         cur += dur;
       }
     }

@@ -28,6 +28,32 @@ async function http(method, path, body, auth = true) {
   if (!res.ok) {
     throw new Error(data.error || data.message || `HTTP ${res.status}: ${path}`);
   }
+
+  // Normalize appointments to include a valid datetime string
+  const normalizeApt = (a) => {
+    if (a && a.appointmentDate && a.timeSlot) {
+      // timeSlot might be '09:00 AM' or '14:30'
+      const timeStr = a.timeSlot;
+      let [time, modifier] = timeStr.split(' ');
+      let [hours, minutes] = time.split(':');
+      if (modifier) {
+        if (hours === '12') hours = '00';
+        if (modifier.toUpperCase() === 'PM') hours = parseInt(hours, 10) + 12;
+      }
+      const hh = String(hours).padStart(2, '0');
+      const mm = String(minutes).padStart(2, '0');
+      a.datetime = `${a.appointmentDate}T${hh}:${mm}:00`;
+    }
+  };
+
+  if (data && data.data && Array.isArray(data.data)) {
+    data.data.forEach(normalizeApt);
+  } else if (Array.isArray(data)) {
+    data.forEach(normalizeApt);
+  } else if (data && data.appointmentDate && data.timeSlot) {
+    normalizeApt(data);
+  }
+  
   return data;
 }
 
@@ -46,7 +72,7 @@ const api = {
   // AUTH  /api/auth
   // ——————————————————————————
   auth: {
-    login:    (email, password, role) => post('/auth/login', { email, password, role }, false),
+    login:          (email, password, role) => post('/auth/login', { email, password, role }, false),
     register: (payload) => post('/auth/register', {
       email:    payload.email,
       password: payload.password,
@@ -61,6 +87,8 @@ const api = {
       conditions: payload.conditions,
     }, false),
     profile: () => get('/auth/profile'),
+    forgotPassword: (email) => post('/auth/forgot-password', { email }, false),
+    resetPassword: (token, password) => post('/auth/reset-password', { token, password }, false),
     logout:  () => { Auth.clear(); window.location.href = '../auth/login.html'; },
   },
 
@@ -80,7 +108,6 @@ const api = {
     get:          (id)          => get(`/doctors/${id}`, false),
     availability: (id, date)    => get(`/doctors/${id}/availability?date=${date}`, false),
     setLeave:     (id, dates)   => post(`/doctors/${id}/leave`, { dates }),
-    prescriptions:()            => get('/doctor/prescriptions'),
     // Admin only
     create:       (payload)     => post('/admin/doctors', payload),
     update:       (id, payload) => put(`/admin/doctors/${id}`, payload),
@@ -117,6 +144,7 @@ const api = {
     patients:    ()              => get('/doctor/patients'),
     profile:     ()              => get('/doctor/profile'),
     submitNotes: (id, payload)   => post(`/doctor/appointments/${id}/notes`, payload),
+    prescriptions:()             => get('/doctor/prescriptions'),
     // Legacy
     postVisit:   (payload)       => post('/doctor/post-visit', payload),
   },

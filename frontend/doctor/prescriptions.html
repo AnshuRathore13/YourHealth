@@ -95,11 +95,7 @@
       renderPrescriptions(list);
     } catch (err) {
       console.error(err);
-      const mock = [
-        { patientName: "Aarav Shah", name: "Amitriptyline", dosage: "10mg", frequency: "Bedtime", date: new Date().toISOString() },
-        { patientName: "Priya Patel", name: "Amoxicillin", dosage: "500mg", frequency: "Three times daily", date: new Date(Date.now() - 86400000 * 5).toISOString() }
-      ];
-      renderPrescriptions(mock);
+      renderPrescriptions([]);
     }
   }
 

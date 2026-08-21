@@ -140,7 +140,7 @@
         <td>
           <div style="display:flex;gap:6px;">
             <button onclick="viewApt(${JSON.stringify(apt).replace(/"/g,'&quot;')})" class="btn btn-ghost btn-sm" style="padding:6px 10px;font-size:0.78rem;">View</button>
-            ${apt.status === 'confirmed' ? `<button onclick="cancelApt(${apt.id})" class="btn btn-danger btn-sm" style="padding:6px 10px;font-size:0.78rem;">Cancel</button>` : ''}
+            ${apt.status === 'confirmed' ? `<button onclick="cancelApt('${apt.id}')" class="btn btn-danger btn-sm" style="padding:6px 10px;font-size:0.78rem;">Cancel</button>` : ''}
           </div>
         </td>
       </tr>`;

@@ -133,3 +133,70 @@ export const getProfile = async (req: AuthRequest, res: Response): Promise<void>
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email } = req.body;
+    const user = await prisma.user.findUnique({ where: { email } });
+    
+    if (!user) {
+      res.json({ message: "If that email exists, a reset link has been sent." });
+      return;
+    }
+
+    const { randomUUID } = require("crypto");
+    const token = randomUUID();
+    const expiry = new Date(Date.now() + 3600000); // 1 hour
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { resetToken: token, resetTokenExpiry: expiry }
+    });
+
+    await prisma.notificationQueue.create({
+      data: {
+        type: "EMAIL",
+        payload: { email: user.email, name: user.name, token, type: "PASSWORD_RESET" }
+      }
+    });
+
+    res.json({ message: "If that email exists, a reset link has been sent." });
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { token, password } = req.body;
+
+    const user = await prisma.user.findFirst({
+      where: {
+        resetToken: token,
+        resetTokenExpiry: { gt: new Date() } // expiry must be in the future
+      }
+    });
+
+    if (!user) {
+      res.status(400).json({ error: "Invalid or expired reset token." });
+      return;
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        resetToken: null,
+        resetTokenExpiry: null
+      }
+    });
+
+    res.json({ message: "Password has been successfully reset. You can now log in." });
+  } catch (error) {
+    console.error("Reset password error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};

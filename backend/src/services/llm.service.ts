@@ -13,8 +13,8 @@ export const generatePreVisitSummary = async (symptoms: string) => {
   }
   
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    const prompt = `Analyse these symptoms and return: urgency level (Low / Medium / High), chief complaint, and three suggested questions for the doctor. Format as JSON with keys: urgencyLevel, summary. Symptoms: ${symptoms}`;
+    const model = genAI.getGenerativeModel({ model: "gemini-3.6-flash" });
+    const prompt = `Analyse these symptoms and return: urgency level (Low / Medium / High), chief complaint, and three suggested questions for the doctor. Format as JSON with keys: urgencyLevel (string), summary (a single formatted string containing the chief complaint and the questions). Symptoms: ${symptoms}`;
     
     const result = await model.generateContent(prompt);
     const response = await result.response;
@@ -26,7 +26,7 @@ export const generatePreVisitSummary = async (symptoms: string) => {
       const parsed = JSON.parse(jsonStr);
       return {
         urgencyLevel: parsed.urgencyLevel || "Medium",
-        preVisitSummary: parsed.summary || text
+        preVisitSummary: typeof parsed.summary === 'string' ? parsed.summary : (JSON.stringify(parsed.summary, null, 2) || text)
       };
     } catch (e) {
       return {
@@ -49,7 +49,7 @@ export const generatePostVisitSummary = async (notes: string) => {
   }
   
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.6-flash" });
     const prompt = `Convert these clinical notes into a patient-friendly summary with medication schedule and follow-up steps: ${notes}`;
     
     const result = await model.generateContent(prompt);

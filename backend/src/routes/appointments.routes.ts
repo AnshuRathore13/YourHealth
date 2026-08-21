@@ -79,6 +79,34 @@ router.post("/", authenticate, requireRole(["PATIENT"]), async (req: AuthRequest
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
     try {
+      // 1. Check if patient already has a non-cancelled appointment at this date/time
+      const patientConflict = await prisma.appointment.findFirst({
+        where: {
+          patientId,
+          appointmentDate: date,
+          timeSlot: time,
+          status: { in: ["CONFIRMED", "PENDING"] }
+        }
+      });
+      if (patientConflict) {
+        res.status(409).json({ error: "You already have an appointment scheduled at this time." });
+        return;
+      }
+
+      // 2. Check if doctor already has a non-cancelled appointment at this date/time
+      const doctorConflict = await prisma.appointment.findFirst({
+        where: {
+          doctorId,
+          appointmentDate: date,
+          timeSlot: time,
+          status: { in: ["CONFIRMED", "PENDING"] }
+        }
+      });
+      if (doctorConflict) {
+        res.status(409).json({ error: "This slot is no longer available. Please select another time." });
+        return;
+      }
+
       const appointment = await prisma.appointment.create({
         data: {
           patientId,
@@ -107,7 +135,8 @@ router.post("/", authenticate, requireRole(["PATIENT"]), async (req: AuthRequest
         res.status(409).json({ error: "Slot is no longer available — double-booking prevented" });
         return;
       }
-      throw e;
+      console.error(e);
+      res.status(500).json({ error: "Internal server error during booking" });
     }
   } catch (error) {
     console.error(error);

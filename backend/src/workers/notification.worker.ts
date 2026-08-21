@@ -29,6 +29,13 @@ export const startWorkers = () => {
                   `Hi Dr. ${user.name},\n\nYour account has been created.\nEmail: ${user.email}\nTemporary Password: ${payload.tempPassword}`
                 );
               }
+            } else if (payload.type === "PASSWORD_RESET") {
+              const resetLink = `http://localhost:3000/auth/login.html?reset_token=${payload.token}`;
+              await sendEmail(
+                payload.email,
+                "Password Reset Request - YourHealth.AI",
+                `Hi ${payload.name},\n\nYou requested a password reset. Please click the link below to set a new password:\n\n${resetLink}\n\nIf you did not request this, please ignore this email.\nThis link will expire in 1 hour.`
+              );
             } else {
               const appointment = await prisma.appointment.findUnique({
                 where: { id: payload.appointmentId },

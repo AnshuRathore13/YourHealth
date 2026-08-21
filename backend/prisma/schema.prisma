@@ -76,6 +76,9 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  resetToken       String?
+  resetTokenExpiry DateTime?
+
   // Patient health profile (optional)
   phone      String?
   dob        String?
@@ -132,7 +135,6 @@ model Appointment {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([doctorId, appointmentDate, timeSlot])
 }
 
 model NotificationQueue {
