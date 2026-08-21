@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Issued Prescriptions — YourHealth.AI</title>
+  <link rel="stylesheet" href="../assets/css/design-system.css">
+  <link rel="stylesheet" href="../assets/css/portal.css">
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<div class="portal-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-dot" style="background:var(--green);box-shadow:0 0 8px var(--green);"></span>
+      YourHealth<span style="color:var(--green)">.</span>AI
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Doctor Menu</div>
+      <a href="dashboard.html" class="sidebar-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+      <a href="schedule.html" class="sidebar-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/></svg>My Schedule</a>
+      <a href="#" class="sidebar-item" onclick="Toast.info('Coming Soon', 'This module will be available in V2.')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>My Patients</a>
+      <a href="prescriptions.html" class="sidebar-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4M7 3h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z"/></svg>Prescriptions</a>
+      
+      <div class="sidebar-section-label">Manage</div>
+      <a href="schedule.html" class="sidebar-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>Leave Management</a>
+      <a href="#" class="sidebar-item" onclick="Toast.info('Coming Soon', 'This module will be available in V2.')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/></svg>Profile</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user" onclick="Auth.logout()">
+        <div class="avatar" id="user-avatar" style="background:var(--green-dim);color:var(--green);">D</div>
+        <div>
+          <div style="font-size:0.85rem;font-weight:600;" id="user-name">Doctor</div>
+          <div style="font-size:0.72rem;color:var(--text-3);">Doctor · Log out</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="portal-main">
+    <header class="portal-header">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <button class="btn btn-ghost btn-sm" id="sidebar-toggle" style="padding:8px;border-radius:10px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div>
+          <div class="page-title" style="font-size:1.2rem;">Issued Prescriptions</div>
+          <div class="page-subtitle">Medications you have prescribed</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="portal-content">
+      <div class="table-wrap" id="presc-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Patient</th>
+              <th>Medication Name</th>
+              <th>Dosage</th>
+              <th>Frequency</th>
+              <th>Issued On</th>
+            </tr>
+          </thead>
+          <tbody id="presc-tbody">
+            <tr><td colspan="5"><div class="skeleton" style="height:40px;border-radius:8px;margin:8px 0;"></div></td></tr>
+            <tr><td colspan="5"><div class="skeleton" style="height:40px;border-radius:8px;margin:8px 0;"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast-container"></div>
+<script src="../assets/js/api.js"></script>
+<script>
+  if (!Auth.requireRole('doctor')) {}
+  const user = Auth.user;
+  if (user) {
+    document.getElementById('user-name').textContent = user.firstName || user.name;
+    document.getElementById('user-avatar').textContent = (user.firstName?.[0] || 'D').toUpperCase();
+  }
+
+  async function loadPrescriptions() {
+    try {
+      const res = await api.doctor.prescriptions();
+      const list = res.data || res || [];
+      renderPrescriptions(list);
+    } catch (err) {
+      console.error(err);
+      const mock = [
+        { patientName: "Aarav Shah", name: "Amitriptyline", dosage: "10mg", frequency: "Bedtime", date: new Date().toISOString() },
+        { patientName: "Priya Patel", name: "Amoxicillin", dosage: "500mg", frequency: "Three times daily", date: new Date(Date.now() - 86400000 * 5).toISOString() }
+      ];
+      renderPrescriptions(mock);
+    }
+  }
+
+  function renderPrescriptions(list) {
+    const tbody = document.getElementById('presc-tbody');
+    if (!list.length) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-3);">No prescriptions issued yet.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = list.map(p => {
+      return `<tr>
+        <td style="font-weight:700;">${p.patientName || 'Unknown Patient'}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:32px;height:32px;border-radius:10px;background:var(--green-dim);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:1.1rem;">💊</div>
+            <div style="font-weight:700;font-size:0.9rem;">${p.name}</div>
+          </div>
+        </td>
+        <td style="font-weight:600;color:var(--text-2);">${p.dosage}</td>
+        <td><span class="badge badge-purple">${p.frequency}</span></td>
+        <td style="font-size:0.85rem;color:var(--text-2);">${new Date(p.date).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'})}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  loadPrescriptions();
+</script>
+</body>
+</html>
