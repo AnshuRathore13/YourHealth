@@ -1,0 +1,147 @@
+// Updated Prisma schema additions — paste these into C:\UTH.AI\backend\prisma\schema.prisma
+
+// ========================================
+// UPDATE: DoctorProfile model
+// Add these fields to the existing DoctorProfile block:
+// ========================================
+// model DoctorProfile {
+//   ...existing fields...
+//   consultationFee Int     @default(500)
+//   experience      Int     @default(0)
+//   bio             String?
+//   rating          Float   @default(4.5)
+// }
+
+// ========================================
+// UPDATE: User model  
+// Add these fields to the existing User block:
+// ========================================
+// model User {
+//   ...existing fields...
+//   phone      String?
+//   dob        String?
+//   gender     String?
+//   bloodGroup String?
+//   allergies  String?
+//   conditions String?
+// }
+
+// ========================================
+// FIX: NotificationQueue status enum
+// Change SUCCESS -> SENT to match admin stats query
+// ========================================
+// enum NotificationStatus {
+//   PENDING
+//   FAILED
+//   SENT     // was SUCCESS
+// }
+
+// ========================================
+// Full updated schema for reference
+// ========================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  PATIENT
+  DOCTOR
+  ADMIN
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum NotificationStatus {
+  PENDING
+  FAILED
+  SUCCESS
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Patient health profile (optional)
+  phone      String?
+  dob        String?
+  gender     String?
+  bloodGroup String?
+  allergies  String?
+  conditions String?
+
+  // Relationships
+  doctorProfile         DoctorProfile?
+  appointmentsAsPatient Appointment[]  @relation("PatientAppointments")
+  appointmentsAsDoctor  Appointment[]  @relation("DoctorAppointments")
+}
+
+model DoctorProfile {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  specialization  String
+  workingHours    Json     // { start: "09:00", end: "17:00" }
+  slotDuration    Int      // minutes
+  leaveDays       String[] // ["2026-08-25", ...]
+  consultationFee Int      @default(500)
+  experience      Int      @default(0)
+  bio             String?
+  rating          Float    @default(4.5)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Appointment {
+  id              String            @id @default(uuid())
+  patientId       String
+  patient         User              @relation("PatientAppointments", fields: [patientId], references: [id])
+  doctorId        String
+  doctor          User              @relation("DoctorAppointments", fields: [doctorId], references: [id])
+
+  appointmentDate String
+  timeSlot        String
+  status          AppointmentStatus @default(PENDING)
+  expiresAt       DateTime?
+
+  // Clinical data
+  symptoms         String?
+  preVisitSummary  String?
+  urgencyLevel     String?
+  postVisitNotes   String?
+  postVisitSummary String?
+
+  // External integration
+  calendarEventId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([doctorId, appointmentDate, timeSlot])
+}
+
+model NotificationQueue {
+  id           String             @id @default(uuid())
+  type         String             // "EMAIL", "CALENDAR"
+  payload      Json
+  status       NotificationStatus @default(PENDING)
+  retryCount   Int                @default(0)
+  errorMessage String?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+}

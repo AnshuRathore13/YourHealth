@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log In — YourHealth.AI</title>
+  <meta name="description" content="Sign in to your YourHealth.AI portal — Patient, Doctor, or Admin.">
+  <link rel="stylesheet" href="../assets/css/design-system.css">
+  <style>
+    body { min-height: 100vh; display: flex; align-items: stretch; }
+
+    .auth-left {
+      flex: 1;
+      background: var(--bg-alt);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px 56px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-right {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px 56px;
+      max-width: 520px;
+    }
+
+    .auth-logo {
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      margin-bottom: 48px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .role-tabs {
+      display: flex;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-full);
+      padding: 4px;
+      margin-bottom: 32px;
+    }
+
+    .role-tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      border-radius: var(--r-full);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--t-base);
+      color: var(--text-2);
+    }
+
+    .role-tab.active {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 2px 12px var(--accent-glow);
+    }
+
+    .role-tab[data-role="doctor"].active  { background: var(--green);  color: #080810; }
+    .role-tab[data-role="admin"].active   { background: var(--purple); color: #fff; }
+
+    .auth-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      margin-bottom: 6px;
+    }
+
+    .auth-subtitle {
+      font-size: 0.88rem;
+      color: var(--text-2);
+      margin-bottom: 32px;
+    }
+
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .auth-divider {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-3);
+      position: relative;
+      margin: 8px 0;
+    }
+    .auth-divider::before, .auth-divider::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 42%;
+      height: 1px;
+      background: var(--border);
+    }
+    .auth-divider::before { left: 0; }
+    .auth-divider::after  { right: 0; }
+
+    .auth-footer-link {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-2);
+      margin-top: 20px;
+    }
+
+    .auth-footer-link a {
+      color: var(--accent);
+      font-weight: 600;
+      transition: opacity var(--t-fast);
+    }
+    .auth-footer-link a:hover { opacity: 0.8; }
+
+    /* Left panel */
+    .auth-feature-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .auth-feature {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .auth-feature-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .auth-feature-title  { font-size: 0.9rem; font-weight: 700; margin-bottom: 2px; }
+    .auth-feature-desc   { font-size: 0.8rem; color: var(--text-2); }
+
+    @media (max-width: 768px) {
+      body { flex-direction: column; }
+      .auth-left { display: none; }
+      .auth-right { max-width: 100%; padding: 40px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Left panel -->
+<div class="auth-left">
+  <div class="hero-bg" style="opacity:0.5;">
+    <div class="hero-blob hero-blob-1" style="width:400px;height:400px;top:-100px;left:-100px;"></div>
+    <div class="hero-blob hero-blob-2" style="width:300px;height:300px;bottom:0;right:-50px;"></div>
+  </div>
+
+  <div class="auth-logo" style="position:relative;z-index:2;">
+    <span class="logo-dot"></span>
+    YourHealth<span style="color:var(--accent)">.</span>AI
+  </div>
+
+  <div style="position:relative;z-index:2;margin-bottom:40px;">
+    <div class="section-label" style="margin-bottom:12px;">✦ Smart Healthcare Platform</div>
+    <h1 class="section-title" style="font-size:2rem;margin-bottom:12px;">Welcome back to<br>your health journey</h1>
+    <p style="font-size:0.88rem;color:var(--text-2);line-height:1.6;">Access your personalized portal, view AI-powered summaries, and manage your healthcare — all in one place.</p>
+  </div>
+
+  <div class="auth-feature-list">
+    <div class="auth-feature">
+      <div class="auth-feature-icon" style="background:var(--accent-dim);">🧠</div>
+      <div>
+        <div class="auth-feature-title">AI Pre-Visit Summaries</div>
+        <div class="auth-feature-desc">Gemini AI analyzes symptoms and prepares urgency reports for your doctor.</div>
+      </div>
+    </div>
+    <div class="auth-feature">
+      <div class="auth-feature-icon" style="background:var(--green-dim);">📅</div>
+      <div>
+        <div class="auth-feature-title">Google Calendar Sync</div>
+        <div class="auth-feature-desc">All appointments automatically appear in your calendar — no manual entry.</div>
+      </div>
+    </div>
+    <div class="auth-feature">
+      <div class="auth-feature-icon" style="background:var(--purple-dim);">💊</div>
+      <div>
+        <div class="auth-feature-title">Medication Reminders</div>
+        <div class="auth-feature-desc">Smart email reminders based on your prescription frequency.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Right panel: Login form -->
+<div class="auth-right">
+  <div class="auth-logo" style="display:none" id="mobile-logo">
+    <span class="logo-dot"></span>
+    YourHealth<span style="color:var(--accent)">.</span>AI
+  </div>
+
+  <!-- Role selector -->
+  <div class="role-tabs" id="role-tabs">
+    <div class="role-tab active" data-role="patient" onclick="selectRole('patient')">🧑‍⚕️ Patient</div>
+    <div class="role-tab"        data-role="doctor"  onclick="selectRole('doctor')">👨‍⚕️ Doctor</div>
+    <div class="role-tab"        data-role="admin"   onclick="selectRole('admin')">🛡️ Admin</div>
+  </div>
+
+  <h2 class="auth-title" id="auth-title">Welcome back</h2>
+  <p class="auth-subtitle" id="auth-subtitle">Sign in to your patient portal</p>
+
+  <form class="auth-form" id="login-form" onsubmit="handleLogin(event)">
+    <div class="form-group">
+      <label class="form-label" for="email">Email Address</label>
+      <input class="form-input" type="email" id="email" name="email" placeholder="you@example.com" required autocomplete="email">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="password">Password</label>
+      <div style="position:relative;">
+        <input class="form-input" type="password" id="password" name="password" placeholder="••••••••" required autocomplete="current-password" style="padding-right:48px;">
+        <button type="button" onclick="togglePassword()" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-3);cursor:pointer;font-size:1rem;" id="eye-btn">👁️</button>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.83rem;color:var(--text-2);">
+        <input type="checkbox" id="remember" style="accent-color:var(--accent);width:14px;height:14px;"> Remember me
+      </label>
+      <a href="#" style="font-size:0.83rem;color:var(--accent);font-weight:600;">Forgot password?</a>
+    </div>
+
+    <button type="submit" class="btn btn-primary w-full" id="login-btn" style="justify-content:center;padding:14px;">
+      Sign In to Portal
+    </button>
+  </form>
+
+  <div class="auth-divider" style="margin:24px 0;">or</div>
+
+  <div class="auth-footer-link">
+    Don't have an account?
+    <a href="register.html">Create one free →</a>
+  </div>
+
+  <div class="auth-footer-link" style="margin-top:10px;font-size:0.78rem;color:var(--text-3);">
+    <a href="../index.html" style="color:var(--text-3);">← Back to homepage</a>
+  </div>
+
+  <!-- Error display -->
+  <div id="auth-error" style="display:none;background:var(--red-dim);border:1px solid rgba(247,79,106,0.3);border-radius:var(--r-md);padding:12px 16px;margin-top:16px;font-size:0.85rem;color:var(--red);">
+    <span id="auth-error-msg"></span>
+  </div>
+</div>
+
+<div class="toast-container"></div>
+<script src="../assets/js/api.js"></script>
+<script>
+  let currentRole = 'patient';
+
+  // Read role from URL param
+  const urlRole = new URLSearchParams(window.location.search).get('role');
+  if (urlRole && ['patient','doctor','admin'].includes(urlRole)) {
+    selectRole(urlRole);
+  }
+
+  function selectRole(role) {
+    currentRole = role;
+    document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector(`[data-role="${role}"]`).classList.add('active');
+
+    const titles = {
+      patient: ['Welcome back', 'Sign in to your patient portal'],
+      doctor:  ['Doctor Portal', 'Sign in to view your schedule'],
+      admin:   ['Admin Dashboard', 'Sign in to manage the system'],
+    };
+    document.getElementById('auth-title').textContent    = titles[role][0];
+    document.getElementById('auth-subtitle').textContent = titles[role][1];
+  }
+
+  function togglePassword() {
+    const inp = document.getElementById('password');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+    document.getElementById('eye-btn').textContent = inp.type === 'password' ? '👁️' : '🙈';
+  }
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    const btn = document.getElementById('login-btn');
+    Loader.show(btn, 'Signing in...');
+    hideError();
+
+    try {
+      const res = await api.auth.login(
+        document.getElementById('email').value,
+        document.getElementById('password').value,
+        currentRole
+      );
+      
+      // Ensure the account role matches the portal they are trying to access
+      if (res.user.role !== currentRole) {
+        throw new Error(`This account is not authorized for the ${currentRole} portal.`);
+      }
+
+      Auth.save(res.token, res.user);
+      Toast.success('Logged in!', `Welcome back, ${res.user.name}`);
+
+      const portals = {
+        patient: '../patient/dashboard.html',
+        doctor:  '../doctor/dashboard.html',
+        admin:   '../admin/dashboard.html',
+      };
+      setTimeout(() => window.location.href = portals[currentRole], 600);
+    } catch (err) {
+      showError(err.message);
+    } finally {
+      Loader.hide(btn);
+    }
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('auth-error');
+    document.getElementById('auth-error-msg').textContent = msg;
+    el.style.display = 'block';
+  }
+  function hideError() {
+    document.getElementById('auth-error').style.display = 'none';
+  }
+
+  // Redirect if already logged in
+  if (Auth.isLoggedIn()) {
+    const portals = { patient: '../patient/dashboard.html', doctor: '../doctor/dashboard.html', admin: '../admin/dashboard.html' };
+    window.location.href = portals[Auth.role] || '../index.html';
+  }
+
+  // Mobile: show logo
+  if (window.innerWidth <= 768) {
+    document.getElementById('mobile-logo').style.display = 'flex';
+  }
+</script>
+</body>
+</html>

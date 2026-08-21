@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient Dashboard — YourHealth.AI</title>
+  <meta name="description" content="Your personal health dashboard — appointments, AI summaries, and medication reminders.">
+  <link rel="stylesheet" href="../assets/css/design-system.css">
+  <link rel="stylesheet" href="../assets/css/portal.css">
+  <style>
+    .apt-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-xl);
+      padding: var(--space-5);
+      transition: all var(--t-base);
+      cursor: pointer;
+    }
+    .apt-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(74,142,245,0.15); }
+    .apt-time-badge {
+      background: var(--surface-3);
+      border-radius: var(--r-md);
+      padding: 10px 14px;
+      text-align: center;
+      min-width: 72px;
+    }
+    .apt-time-hour  { font-size: 1.1rem; font-weight: 800; letter-spacing: -0.04em; }
+    .apt-time-ampm  { font-size: 0.65rem; color: var(--text-3); font-weight: 600; text-transform: uppercase; }
+    .med-card {
+      display: flex; align-items: center; gap: 14px;
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: 14px 16px;
+      transition: all var(--t-fast);
+    }
+    .med-card:hover { border-color: var(--green); }
+    .med-icon { width:40px;height:40px;border-radius:12px;background:var(--green-dim);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0; }
+    .ai-summary-strip {
+      background: linear-gradient(135deg, var(--accent-dim) 0%, rgba(167,139,250,0.08) 100%);
+      border: 1px solid rgba(74,142,245,0.2);
+      border-radius: var(--r-xl);
+      padding: var(--space-5) var(--space-6);
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar Overlay (mobile) -->
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<!-- Portal Layout -->
+<div class="portal-layout">
+
+  <!-- ============================
+       SIDEBAR
+       ============================ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-dot"></span>
+      YourHealth<span style="color:var(--accent)">.</span>AI
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Patient Menu</div>
+      <a href="dashboard.html" class="sidebar-item active" id="nav-dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a href="book.html" class="sidebar-item" id="nav-book">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/></svg>
+        Book Appointment
+      </a>
+      <a href="appointments.html" class="sidebar-item" id="nav-appointments">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        My Appointments
+      </a>
+
+      <div class="sidebar-section-label">Health</div>
+      <a href="#" class="sidebar-item" id="nav-prescriptions" onclick="Toast.info('Coming Soon', 'This module will be available in V2.')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4M7 3h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z"/></svg>
+        Prescriptions
+      </a>
+      <a href="#" class="sidebar-item" id="nav-reminders" onclick="Toast.info('Coming Soon', 'This module will be available in V2.')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+        Reminders
+      </a>
+
+      <div class="sidebar-section-label">Account</div>
+      <a href="#" class="sidebar-item" id="nav-profile" onclick="Toast.info('Coming Soon', 'This module will be available in V2.')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Profile
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user" onclick="Auth.logout()">
+        <div class="avatar" id="user-avatar">?</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:0.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" id="user-name">Loading...</div>
+          <div style="font-size:0.72rem;color:var(--text-3);">Patient · Log out</div>
+        </div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;color:var(--text-3);"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============================
+       MAIN CONTENT
+       ============================ -->
+  <main class="portal-main">
+
+    <!-- Topbar -->
+    <header class="portal-header">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <button class="btn btn-ghost btn-sm" id="sidebar-toggle" style="padding:8px;border-radius:10px;" aria-label="Toggle sidebar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="topbar-search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" placeholder="Search doctors, appointments...">
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="notif-bell" title="Notifications" onclick="Toast.info('All Caught Up!', 'There are no new alerts.')" style="cursor:pointer;">
+          🔔
+        </div>
+        <a href="book.html" class="btn btn-primary btn-sm">+ Book Now</a>
+      </div>
+    </header>
+
+    <!-- Page content -->
+    <div class="portal-content">
+
+      <!-- Page Header -->
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:32px;">
+        <div>
+          <div class="page-title" id="greeting">Good morning 👋</div>
+          <div class="page-subtitle" id="dash-date">Loading your health overview...</div>
+        </div>
+        <a href="book.html" class="btn-arrow">
+          Book an Appointment
+          <div class="arrow-circle">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </a>
+      </div>
+
+      <!-- Stats Row -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:32px;" id="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--accent-dim);">📅</div>
+          <div class="stat-value" id="stat-upcoming">—</div>
+          <div class="stat-label">Upcoming</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--green-dim);">✅</div>
+          <div class="stat-value" id="stat-completed">—</div>
+          <div class="stat-label">Completed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--purple-dim);">💊</div>
+          <div class="stat-value" id="stat-meds">—</div>
+          <div class="stat-label">Active Meds</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--amber-dim);">🧠</div>
+          <div class="stat-value">AI✦</div>
+          <div class="stat-label">AI Summaries</div>
+        </div>
+      </div>
+
+      <!-- Main Grid -->
+      <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:24px;align-items:start;" class="dash-grid">
+
+        <!-- LEFT: Upcoming appointments -->
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+            <div style="font-size:1rem;font-weight:700;">Upcoming Appointments</div>
+            <a href="appointments.html" class="btn-arrow" style="font-size:0.82rem;">
+              View all
+              <div class="arrow-circle" style="width:28px;height:28px;">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </div>
+            </a>
+          </div>
+
+          <div id="appointments-list" style="display:flex;flex-direction:column;gap:12px;">
+            <!-- Skeleton loading -->
+            <div class="skeleton" style="height:88px;border-radius:20px;"></div>
+            <div class="skeleton" style="height:88px;border-radius:20px;"></div>
+            <div class="skeleton" style="height:88px;border-radius:20px;"></div>
+          </div>
+
+          <!-- AI Pre-Visit Summary strip (shows when apt selected) -->
+          <div class="ai-summary-strip" style="margin-top:20px;" id="ai-strip">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <span style="font-size:1.1rem;">🧠</span>
+              <div style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--accent);">AI Pre-Visit Summary</div>
+              <div class="badge badge-amber" style="margin-left:auto;" id="ai-urgency-badge">Medium Urgency</div>
+            </div>
+            <div style="font-size:0.88rem;color:var(--text-2);line-height:1.6;" id="ai-summary-text">
+              Tap an appointment to view your AI-generated pre-visit summary.
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Medication reminders + Recent Activity -->
+        <div style="display:flex;flex-direction:column;gap:20px;">
+
+          <!-- Today's Medications -->
+          <div class="card-dark" style="padding:var(--space-5);">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+              <div style="font-size:0.95rem;font-weight:700;">💊 Today's Medications</div>
+              <div class="badge badge-green">On Track</div>
+            </div>
+            <div id="meds-list" style="display:flex;flex-direction:column;gap:10px;">
+              <div class="skeleton" style="height:58px;border-radius:14px;"></div>
+              <div class="skeleton" style="height:58px;border-radius:14px;"></div>
+            </div>
+          </div>
+
+          <!-- Post-visit Summaries -->
+          <div class="card-dark" style="padding:var(--space-5);">
+            <div style="font-size:0.95rem;font-weight:700;margin-bottom:14px;">📋 Recent Visit Summaries</div>
+            <div id="summaries-list" style="display:flex;flex-direction:column;gap:12px;">
+              <div class="skeleton" style="height:70px;border-radius:14px;"></div>
+            </div>
+          </div>
+
+          <!-- Health Tip -->
+          <div style="background:linear-gradient(135deg,var(--green-dim),transparent);border:1px solid rgba(0,217,163,0.2);border-radius:20px;padding:20px;">
+            <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--green);margin-bottom:8px;">✦ Health Reminder</div>
+            <div style="font-size:0.88rem;color:var(--text);font-weight:600;margin-bottom:4px;">Stay hydrated today</div>
+            <div style="font-size:0.8rem;color:var(--text-2);">Drink at least 8 glasses of water. Your next appointment is tomorrow.</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /portal-content -->
+  </main>
+</div><!-- /portal-layout -->
+
+<div class="toast-container"></div>
+<script src="../assets/js/api.js"></script>
+<script>
+  // Auth guard
+  if (!Auth.requireRole('patient')) {}
+
+  // Populate user info
+  const user = Auth.user;
+  if (user) {
+    document.getElementById('user-name').textContent = `${user.firstName || user.name}`;
+    document.getElementById('user-avatar').textContent = (user.firstName?.[0] || user.name?.[0] || 'P').toUpperCase();
+
+    const hour = new Date().getHours();
+    const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+    document.getElementById('greeting').textContent = `${greet}, ${user.firstName || user.name} 👋`;
+    document.getElementById('dash-date').textContent = new Date().toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  }
+
+  // Load dashboard data
+  async function loadDashboard() {
+    try {
+      // Load appointments
+      const apts = await api.patient.appointments('upcoming');
+      renderAppointments(apts.data || apts || []);
+
+      // Load meds
+      const meds = await api.patient.prescriptions();
+      renderMeds(meds.data || meds || []);
+
+      // Load stats
+      const all = await api.patient.appointments();
+      const data = all.data || all || [];
+      document.getElementById('stat-upcoming').textContent  = data.filter(a => a.status === 'confirmed').length;
+      document.getElementById('stat-completed').textContent = data.filter(a => a.status === 'completed').length;
+
+      const medsData = meds.data || meds || [];
+      document.getElementById('stat-meds').textContent = medsData.length;
+
+      // Load summaries
+      const completed = data.filter(a => a.postVisitSummary);
+      renderSummaries(completed);
+
+    } catch (err) {
+      console.error('Dashboard load failed:', err);
+      // Show mock data for demo
+      renderAppointments(MOCK_APPOINTMENTS);
+      renderMeds(MOCK_MEDS);
+      renderSummaries(MOCK_SUMMARIES);
+      document.getElementById('stat-upcoming').textContent  = '2';
+      document.getElementById('stat-completed').textContent = '5';
+      document.getElementById('stat-meds').textContent = '3';
+    }
+  }
+
+  function renderAppointments(list) {
+    const el = document.getElementById('appointments-list');
+    if (!list.length) {
+      el.innerHTML = `<div style="text-align:center;padding:32px;color:var(--text-3);">
+        <div style="font-size:2rem;margin-bottom:12px;">📭</div>
+        <div style="font-size:0.9rem;">No upcoming appointments</div>
+        <a href="book.html" class="btn btn-primary btn-sm" style="margin-top:12px;display:inline-flex;">Book Now</a>
+      </div>`;
+      return;
+    }
+    el.innerHTML = list.map(apt => {
+      const d = new Date(apt.datetime || apt.date);
+      const hour = d.getHours();
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      const h12 = ((hour % 12) || 12) + ':' + String(d.getMinutes()).padStart(2,'0');
+      const urgency = Format.urgency(apt.urgency || 'Low');
+      return `
+        <div class="apt-card" onclick="showAiSummary(${JSON.stringify(apt).replace(/"/g,'&quot;')})">
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div class="apt-time-badge">
+              <div class="apt-time-hour">${h12}</div>
+              <div class="apt-time-ampm">${ampm}</div>
+            </div>
+            <div style="flex:1;">
+              <div style="font-weight:700;font-size:0.95rem;margin-bottom:3px;">Dr. ${apt.doctorName || apt.doctor?.name || 'Unknown'}</div>
+              <div style="font-size:0.78rem;color:var(--text-2);">${apt.specialisation || apt.doctor?.specialisation || 'General'} · ${Format.date(d)}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+              <span class="badge ${Format.status(apt.status)}">${apt.status || 'confirmed'}</span>
+              <span class="badge ${urgency.class}"><span class="urgency-dot ${urgency.dot}"></span>${urgency.label}</span>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function showAiSummary(apt) {
+    const strip = document.getElementById('ai-strip');
+    const urgency = Format.urgency(apt.urgency || 'Low');
+    document.getElementById('ai-urgency-badge').className = `badge ${urgency.class}`;
+    document.getElementById('ai-urgency-badge').textContent = urgency.label;
+    document.getElementById('ai-summary-text').textContent = apt.preVisitSummary || 'AI pre-visit summary not yet generated. It will appear after you submit symptoms.';
+    strip.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }
+
+  function renderMeds(list) {
+    const el = document.getElementById('meds-list');
+    if (!list.length) {
+      el.innerHTML = `<div style="font-size:0.82rem;color:var(--text-3);text-align:center;padding:16px;">No active prescriptions</div>`;
+      return;
+    }
+    el.innerHTML = list.map(m => `
+      <div class="med-card">
+        <div class="med-icon">💊</div>
+        <div style="flex:1;">
+          <div style="font-size:0.88rem;font-weight:700;">${m.name || m.medication}</div>
+          <div style="font-size:0.75rem;color:var(--text-3);">${m.dosage || ''} · ${m.frequency || 'Daily'}</div>
+        </div>
+        <div class="badge badge-green" style="font-size:0.7rem;">Take today</div>
+      </div>`).join('');
+  }
+
+  function renderSummaries(list) {
+    const el = document.getElementById('summaries-list');
+    if (!list.length) {
+      el.innerHTML = `<div style="font-size:0.82rem;color:var(--text-3);text-align:center;padding:12px;">No completed visit summaries yet</div>`;
+      return;
+    }
+    el.innerHTML = list.slice(0,3).map(apt => `
+      <div style="border:1px solid var(--border);border-radius:14px;padding:14px;transition:all var(--t-fast);" onmouseover="this.style.borderColor='var(--border-hover)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <div style="font-size:0.85rem;font-weight:600;">Dr. ${apt.doctorName || 'Doctor'}</div>
+          <div style="font-size:0.72rem;color:var(--text-3);">${Format.date(apt.datetime || apt.date)}</div>
+        </div>
+        <div style="font-size:0.78rem;color:var(--text-2);line-height:1.5;">${(apt.postVisitSummary || '').slice(0,100)}...</div>
+      </div>`).join('');
+  }
+
+  // Mock data for demo when backend is offline
+  const MOCK_APPOINTMENTS = [
+    { id:1, datetime: new Date(Date.now()+86400000).toISOString(), doctorName:'Ramesh Sharma', specialisation:'Cardiologist', status:'confirmed', urgency:'Medium', preVisitSummary:'Patient reports chest tightness and shortness of breath for 3 days. Chief complaint: exertional dyspnea. Urgency: MEDIUM. Suggested questions: cardiac history, positional changes, associated symptoms.' },
+    { id:2, datetime: new Date(Date.now()+3*86400000).toISOString(), doctorName:'Priya Menon', specialisation:'Dermatologist', status:'confirmed', urgency:'Low', preVisitSummary:'Patient reports skin rash on forearm lasting 1 week. Urgency: LOW. No systemic symptoms. Suggested: topical allergy history, new products used.' },
+  ];
+  const MOCK_MEDS = [
+    { name:'Metformin 500mg', dosage:'500mg', frequency:'After dinner · Daily' },
+    { name:'Atorvastatin 10mg', dosage:'10mg', frequency:'Bedtime · Daily' },
+    { name:'Aspirin 75mg', dosage:'75mg', frequency:'Morning · Daily' },
+  ];
+  const MOCK_SUMMARIES = [
+    { id:10, datetime: new Date(Date.now()-7*86400000).toISOString(), doctorName:'Anil Kumar', postVisitSummary:'Your blood pressure is well controlled. Continue current medication. Increase physical activity to 30 minutes daily. Follow up in 3 months. Avoid salty foods...' },
+  ];
+
+  loadDashboard();
+</script>
+</body>
+</html>

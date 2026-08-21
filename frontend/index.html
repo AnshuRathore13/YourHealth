@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YourHealth.AI — Healthcare, Reimagined</title>
+  <meta name="description" content="AI-powered healthcare appointment & follow-up platform. Book smarter, get AI-generated pre-visit summaries, and stay informed with intelligent reminders.">
+  <meta name="keywords" content="healthcare appointments, AI doctor summary, medical booking, patient portal">
+  <link rel="stylesheet" href="assets/css/design-system.css">
+  <style>
+    /* ===== LANDING PAGE STYLES ===== */
+
+    /* Navbar */
+    .navbar { padding: 22px 0; }
+
+    /* Hero */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      padding: 100px 0 60px;
+    }
+
+    .hero-content { position: relative; z-index: 2; }
+
+    .hero-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent-dim);
+      border: 1px solid rgba(74,142,245,0.25);
+      border-radius: var(--r-full);
+      padding: 6px 16px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+    }
+
+    .hero-title {
+      font-size: clamp(2.8rem, 6vw, 5.5rem);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1.0;
+      margin-bottom: 24px;
+    }
+
+    .hero-title .gradient-text {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--green) 50%, var(--purple) 100%);
+      background-size: 200% 200%;
+      animation: gradientShift 4s ease infinite;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-desc {
+      font-size: 1.1rem;
+      color: var(--text-2);
+      max-width: 560px;
+      line-height: 1.7;
+      margin-bottom: 40px;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .hero-visual {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .hero-cards-stack {
+      position: relative;
+      width: 340px;
+    }
+
+    .hero-card-float {
+      background: var(--surface-2);
+      border: 1px solid var(--border-hover);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .hero-card-float:nth-child(2) {
+      position: absolute;
+      top: -24px;
+      right: -40px;
+      width: 200px;
+      z-index: 2;
+      animation: float 4s ease-in-out infinite;
+    }
+
+    .hero-card-float:nth-child(3) {
+      position: absolute;
+      bottom: -30px;
+      left: -40px;
+      width: 220px;
+      z-index: 3;
+      animation: float 5s ease-in-out infinite reverse;
+    }
+
+    /* Marquee / ticker */
+    .ticker-wrap {
+      overflow: hidden;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      padding: 14px 0;
+      margin: 40px 0 0;
+    }
+
+    .ticker-inner {
+      display: flex;
+      gap: 60px;
+      width: max-content;
+      animation: ticker 25s linear infinite;
+    }
+
+    .ticker-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-2);
+      white-space: nowrap;
+    }
+
+    .ticker-item span { color: var(--accent); font-size: 0.95rem; }
+
+    @keyframes ticker {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* Stats bar */
+    .stats-section {
+      padding: 60px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stat-number {
+      font-size: 2.8rem;
+      font-weight: 900;
+      letter-spacing: -0.05em;
+      background: linear-gradient(135deg, var(--text) 0%, var(--text-2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+    }
+
+    .stat-sublabel {
+      font-size: 0.85rem;
+      color: var(--text-3);
+      margin-top: 4px;
+    }
+
+    /* Features */
+    .features-section {
+      padding: 100px 0;
+    }
+
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-full);
+      padding: 5px 14px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-3);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+
+    .section-desc {
+      font-size: 1rem;
+      color: var(--text-2);
+      max-width: 500px;
+      line-height: 1.7;
+    }
+
+    .feature-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 32px;
+      transition: all var(--t-base);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0;
+      transition: opacity var(--t-base);
+    }
+
+    .feature-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    }
+
+    .feature-card:hover::before { opacity: 1; }
+
+    .feature-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+    }
+
+    .feature-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      letter-spacing: -0.02em;
+    }
+
+    .feature-desc {
+      font-size: 0.88rem;
+      color: var(--text-2);
+      line-height: 1.6;
+    }
+
+    /* Portals section */
+    .portals-section {
+      padding: 100px 0;
+      background: var(--bg-alt);
+    }
+
+    .portal-card {
+      border-radius: 28px;
+      padding: 48px 40px;
+      text-decoration: none;
+      display: block;
+      transition: all 0.35s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .portal-card::after {
+      content: '→';
+      position: absolute;
+      bottom: 32px;
+      right: 36px;
+      font-size: 1.5rem;
+      opacity: 0;
+      transform: translateX(-10px);
+      transition: all var(--t-base);
+    }
+
+    .portal-card:hover::after {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .portal-card:hover { transform: translateY(-6px) scale(1.01); }
+
+    .portal-card.patient {
+      background: linear-gradient(145deg, #0D2040 0%, #0A1628 100%);
+      border: 1px solid rgba(74,142,245,0.25);
+    }
+    .portal-card.patient:hover { box-shadow: 0 20px 60px rgba(74,142,245,0.2); }
+
+    .portal-card.doctor {
+      background: linear-gradient(145deg, #0D2B20 0%, #081A12 100%);
+      border: 1px solid rgba(0,217,163,0.25);
+    }
+    .portal-card.doctor:hover { box-shadow: 0 20px 60px rgba(0,217,163,0.2); }
+
+    .portal-card.admin {
+      background: linear-gradient(145deg, #1E0D2B 0%, #140A1E 100%);
+      border: 1px solid rgba(167,139,250,0.25);
+    }
+    .portal-card.admin:hover { box-shadow: 0 20px 60px rgba(167,139,250,0.2); }
+
+    .portal-icon {
+      font-size: 3rem;
+      margin-bottom: 24px;
+      display: block;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .portal-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 10px;
+    }
+
+    .portal-desc {
+      font-size: 0.9rem;
+      color: var(--text-2);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .portal-features {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .portal-feature-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.83rem;
+      color: var(--text-2);
+    }
+
+    .portal-feature-item::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .patient .portal-feature-item::before { background: var(--accent); }
+    .doctor  .portal-feature-item::before { background: var(--green); }
+    .admin   .portal-feature-item::before { background: var(--purple); }
+
+    /* How it works */
+    .hiw-section { padding: 100px 0; }
+
+    .step-card {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+      padding: 28px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      transition: all var(--t-base);
+    }
+
+    .step-card:hover {
+      border-color: var(--border-hover);
+      transform: translateX(6px);
+    }
+
+    .step-number {
+      font-size: 2.5rem;
+      font-weight: 900;
+      letter-spacing: -0.06em;
+      line-height: 1;
+      opacity: 0.15;
+      flex-shrink: 0;
+      width: 48px;
+    }
+
+    .step-body { flex: 1; }
+    .step-title { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+    .step-desc  { font-size: 0.85rem; color: var(--text-2); line-height: 1.6; }
+
+    /* AI section */
+    .ai-section {
+      padding: 100px 0;
+      background: var(--bg-alt);
+    }
+
+    .ai-demo-card {
+      background: var(--surface);
+      border: 1px solid var(--border-hover);
+      border-radius: 24px;
+      overflow: hidden;
+    }
+
+    .ai-demo-header {
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .demo-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+    }
+
+    .ai-demo-body { padding: 24px; }
+
+    .ai-prompt {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-size: 0.85rem;
+      color: var(--text-2);
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+
+    .ai-response {
+      border-left: 3px solid var(--accent);
+      padding-left: 16px;
+    }
+
+    .ai-response-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .ai-response-text {
+      font-size: 0.88rem;
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    .urgency-banner {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--amber-dim);
+      border: 1px solid rgba(247,169,79,0.3);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.83rem;
+      font-weight: 600;
+      color: var(--amber);
+      margin-top: 14px;
+    }
+
+    /* CTA section */
+    .cta-section {
+      padding: 100px 0;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-section .hero-blob-1 { opacity: 0.08; }
+
+    /* Footer */
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 60px 0 32px;
+    }
+
+    .footer-logo {
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      margin-bottom: 10px;
+    }
+
+    .footer-desc {
+      font-size: 0.85rem;
+      color: var(--text-3);
+      max-width: 280px;
+      line-height: 1.6;
+    }
+
+    .footer-heading {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-3);
+      margin-bottom: 16px;
+    }
+
+    .footer-link {
+      display: block;
+      font-size: 0.88rem;
+      color: var(--text-2);
+      margin-bottom: 10px;
+      transition: color var(--t-fast);
+    }
+    .footer-link:hover { color: var(--accent); }
+
+    .footer-bottom {
+      border-top: 1px solid var(--border);
+      padding-top: 24px;
+      margin-top: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .footer-copy {
+      font-size: 0.8rem;
+      color: var(--text-3);
+    }
+
+    /* Mobile nav */
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(8,8,16,0.98);
+      backdrop-filter: blur(20px);
+      z-index: 150;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+    }
+
+    .mobile-menu.open { display: flex; }
+
+    .mobile-menu-link {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.03em;
+      transition: color var(--t-fast);
+    }
+
+    .mobile-menu-link:hover { color: var(--accent); }
+
+    .mobile-close {
+      position: absolute;
+      top: 24px; right: 24px;
+      font-size: 1.5rem;
+      color: var(--text-2);
+      cursor: pointer;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .hero-two-col { flex-direction: column; }
+      .hero-visual { margin-top: 40px; }
+      .hero-cards-stack { width: 100%; max-width: 340px; margin: 0 auto; }
+    }
+
+    @media (max-width: 768px) {
+      .portals-grid { grid-template-columns: 1fr; }
+      .footer-grid  { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================
+     NAVIGATION
+     ============================ -->
+<nav class="navbar" id="main-navbar">
+  <div class="container">
+    <div class="navbar-inner">
+      <!-- Logo -->
+      <a href="index.html" class="navbar-logo">
+        <span class="logo-dot"></span>
+        YourHealth<span style="color:var(--accent)">.</span>AI
+      </a>
+
+      <!-- Desktop Nav Links -->
+      <div class="navbar-links">
+        <a href="#features"  class="navbar-link">Features</a>
+        <a href="#portals"   class="navbar-link">Portals</a>
+        <a href="#how"       class="navbar-link">How it Works</a>
+        <a href="#ai"        class="navbar-link">AI Engine</a>
+      </div>
+
+      <!-- CTA Actions -->
+      <div class="navbar-actions">
+        <a href="auth/login.html"    class="btn btn-ghost btn-sm" style="display:none;" id="nav-login">Sign In</a>
+        <a href="auth/login.html"    class="btn btn-outline btn-sm" id="nav-login-visible">Log In</a>
+        <a href="auth/register.html" class="btn btn-primary btn-sm">Get Started</a>
+        <div class="hamburger" id="hamburger" onclick="document.getElementById('mobile-menu').classList.add('open')">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobile-menu">
+  <span class="mobile-close" onclick="document.getElementById('mobile-menu').classList.remove('open')">✕</span>
+  <a href="#features"  class="mobile-menu-link" onclick="document.getElementById('mobile-menu').classList.remove('open')">Features</a>
+  <a href="#portals"   class="mobile-menu-link" onclick="document.getElementById('mobile-menu').classList.remove('open')">Portals</a>
+  <a href="#how"       class="mobile-menu-link" onclick="document.getElementById('mobile-menu').classList.remove('open')">How it Works</a>
+  <a href="auth/login.html"    class="mobile-menu-link">Log In</a>
+  <a href="auth/register.html" class="btn btn-primary btn-lg" style="margin-top:16px;">Get Started Free</a>
+</div>
+
+<!-- ============================
+     HERO SECTION
+     ============================ -->
+<section class="hero">
+  <!-- Background Effects -->
+  <div class="hero-bg">
+    <div class="hero-grid"></div>
+    <div class="hero-blob hero-blob-1"></div>
+    <div class="hero-blob hero-blob-2"></div>
+    <div class="hero-blob hero-blob-3"></div>
+  </div>
+
+  <div class="container">
+    <div class="flex gap-8 items-center hero-two-col" style="flex-wrap:wrap;">
+      <!-- Left: Copy -->
+      <div class="hero-content" style="flex:1;min-width:320px;">
+        <div class="hero-label" data-animate style="animation:fadeUp 0.6s ease forwards;">
+          <span>✦</span> Final Year Project — Healthcare AI
+        </div>
+        <h1 class="hero-title" data-animate style="animation:fadeUp 0.6s 0.1s ease both;">
+          Healthcare,<br>
+          <span class="gradient-text">Reimagined</span><br>
+          by AI
+        </h1>
+        <p class="hero-desc" data-animate style="animation:fadeUp 0.6s 0.2s ease both;">
+          Book appointments with AI-generated pre-visit summaries, get post-visit insights, and stay ahead with smart medication reminders — all in one platform.
+        </p>
+        <div class="hero-actions" data-animate style="animation:fadeUp 0.6s 0.3s ease both;">
+          <a href="auth/register.html" class="btn btn-primary btn-xl">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            Start Free
+          </a>
+          <a href="#portals" class="btn btn-outline btn-xl">View Portals</a>
+        </div>
+
+        <!-- Trust indicators -->
+        <div class="flex items-center gap-4" style="margin-top:40px;flex-wrap:wrap;" data-animate style="animation:fadeUp 0.6s 0.4s ease both;">
+          <div style="display:flex;align-items:center;gap:-8px;">
+            <div class="avatar" style="width:32px;height:32px;font-size:0.7rem;z-index:3;">P</div>
+            <div class="avatar" style="width:32px;height:32px;font-size:0.7rem;z-index:2;margin-left:-8px;background:var(--green-dim);color:var(--green);">D</div>
+            <div class="avatar" style="width:32px;height:32px;font-size:0.7rem;z-index:1;margin-left:-8px;background:var(--purple-dim);color:var(--purple);">A</div>
+          </div>
+          <div>
+            <div style="font-size:0.82rem;font-weight:600;">3 Portals. One Platform.</div>
+            <div style="font-size:0.75rem;color:var(--text-3);">Patient · Doctor · Admin</div>
+          </div>
+          <div class="divider" style="width:1px;height:36px;background:var(--border);margin:0;"></div>
+          <div class="badge badge-green">
+            <span class="urgency-dot urgency-low"></span> AI Powered
+          </div>
+          <div class="badge badge-blue">Google Calendar Sync</div>
+        </div>
+      </div>
+
+      <!-- Right: Visual Demo Cards -->
+      <div class="hero-visual" style="flex:1;min-width:280px;max-width:440px;margin-left:auto;">
+        <div class="hero-cards-stack">
+          <!-- Main card -->
+          <div class="hero-card-float" style="border-radius:24px;position:relative;z-index:1;">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+              <div class="avatar avatar-lg" style="background:var(--accent-dim);">RS</div>
+              <div>
+                <div style="font-weight:700;font-size:0.95rem;">Dr. Ramesh Sharma</div>
+                <div style="font-size:0.78rem;color:var(--text-2);">Cardiologist · 10:30 AM</div>
+              </div>
+              <div class="badge badge-green" style="margin-left:auto;">Confirmed</div>
+            </div>
+            <div style="background:var(--accent-dim);border:1px solid rgba(74,142,245,0.2);border-radius:12px;padding:12px;">
+              <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--accent);margin-bottom:6px;">✦ AI Pre-Visit Summary</div>
+              <div style="font-size:0.8rem;color:var(--text-2);line-height:1.5;">Patient reports chest discomfort for 3 days. Urgency: <strong style="color:var(--amber);">Medium</strong>. Suggested questions prepared.</div>
+            </div>
+          </div>
+
+          <!-- Floating card: urgency alert -->
+          <div class="hero-card-float" style="border-radius:16px;">
+            <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--red);margin-bottom:8px;">⚡ High Urgency</div>
+            <div style="font-size:0.78rem;color:var(--text);font-weight:600;">Symptoms flagged</div>
+            <div style="font-size:0.72rem;color:var(--text-3);margin-top:4px;">See doctor ASAP</div>
+          </div>
+
+          <!-- Floating card: reminder -->
+          <div class="hero-card-float" style="border-radius:16px;">
+            <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--green);margin-bottom:8px;">💊 Reminder</div>
+            <div style="font-size:0.78rem;color:var(--text);font-weight:600;">Metformin 500mg</div>
+            <div style="font-size:0.72rem;color:var(--text-3);margin-top:4px;">Take after dinner • Daily</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Ticker -->
+<div class="ticker-wrap">
+  <div class="ticker-inner" id="ticker">
+    <div class="ticker-item"><span>✦</span> AI-Generated Pre-Visit Summaries</div>
+    <div class="ticker-item"><span>✦</span> Double-Booking Prevention</div>
+    <div class="ticker-item"><span>✦</span> Google Calendar Integration</div>
+    <div class="ticker-item"><span>✦</span> Smart Medication Reminders</div>
+    <div class="ticker-item"><span>✦</span> Role-Based Portals</div>
+    <div class="ticker-item"><span>✦</span> Email Notifications</div>
+    <div class="ticker-item"><span>✦</span> Post-Visit AI Summaries</div>
+    <div class="ticker-item"><span>✦</span> Doctor Leave Management</div>
+    <!-- Duplicate for seamless loop -->
+    <div class="ticker-item"><span>✦</span> AI-Generated Pre-Visit Summaries</div>
+    <div class="ticker-item"><span>✦</span> Double-Booking Prevention</div>
+    <div class="ticker-item"><span>✦</span> Google Calendar Integration</div>
+    <div class="ticker-item"><span>✦</span> Smart Medication Reminders</div>
+    <div class="ticker-item"><span>✦</span> Role-Based Portals</div>
+    <div class="ticker-item"><span>✦</span> Email Notifications</div>
+    <div class="ticker-item"><span>✦</span> Post-Visit AI Summaries</div>
+    <div class="ticker-item"><span>✦</span> Doctor Leave Management</div>
+  </div>
+</div>
+
+<!-- ============================
+     STATS
+     ============================ -->
+<section class="stats-section">
+  <div class="container">
+    <div class="grid grid-4 gap-6">
+      <div class="text-center" data-animate style="animation:fadeUp 0.5s ease both;">
+        <div class="stat-number">3</div>
+        <div class="stat-sublabel">Role-based Portals</div>
+      </div>
+      <div class="text-center" data-animate style="animation:fadeUp 0.5s 0.1s ease both;">
+        <div class="stat-number">AI✦</div>
+        <div class="stat-sublabel">Gemini-Powered Summaries</div>
+      </div>
+      <div class="text-center" data-animate style="animation:fadeUp 0.5s 0.2s ease both;">
+        <div class="stat-number">0ms</div>
+        <div class="stat-sublabel">Double-booking Conflicts</div>
+      </div>
+      <div class="text-center" data-animate style="animation:fadeUp 0.5s 0.3s ease both;">
+        <div class="stat-number">∞</div>
+        <div class="stat-sublabel">Scalable Appointments</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================
+     FEATURES
+     ============================ -->
+<section class="features-section" id="features">
+  <div class="container">
+    <div class="text-center" style="margin-bottom:60px;">
+      <div class="section-label" style="justify-content:center;">✦ Core Features</div>
+      <h2 class="section-title">Everything a modern<br>healthcare platform needs</h2>
+      <p class="section-desc" style="margin:0 auto;">From intelligent booking to AI-powered follow-ups — built for patients, doctors, and administrators.</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;">
+      <div class="feature-card" data-animate style="animation:fadeUp 0.5s ease both;">
+        <div class="feature-icon" style="background:var(--accent-dim);">🧠</div>
+        <div class="feature-title">AI Pre-Visit Summaries</div>
+        <div class="feature-desc">Patients submit symptoms before booking. Gemini AI generates urgency level (Low / Medium / High) and suggested questions for the doctor.</div>
+      </div>
+      <div class="feature-card" data-animate style="animation:fadeUp 0.5s 0.1s ease both;">
+        <div class="feature-icon" style="background:var(--green-dim);">📋</div>
+        <div class="feature-title">Post-Visit AI Summaries</div>
+        <div class="feature-desc">Doctors submit clinical notes, and AI transforms them into patient-friendly summaries with a clear medication schedule.</div>
+      </div>
+      <div class="feature-card" data-animate style="animation:fadeUp 0.5s 0.2s ease both;">
+        <div class="feature-icon" style="background:var(--red-dim);">🔒</div>
+        <div class="feature-title">Double-Booking Prevention</div>
+        <div class="feature-desc">Slot locking mechanism ensures no two patients can book the same slot simultaneously, with atomic DB transactions.</div>
+      </div>
+      <div class="feature-card" data-animate style="animation:fadeUp 0.5s 0.3s ease both;">
+        <div class="feature-icon" style="background:var(--amber-dim);">📅</div>
+        <div class="feature-title">Google Calendar Sync</div>
+        <div class="feature-desc">Appointments automatically create/update/delete calendar events for both patients and doctors via Google Calendar OAuth.</div>
+      </div>
+      <div class="feature-card" data-animate style="animation:fadeUp 0.5s 0.4s ease both;">
+        <div class="feature-icon" style="background:var(--purple-dim);">💊</div>
+        <div class="feature-title">Smart Medication Reminders</div>
+        <div class="feature-desc">Background worker sends email reminders based on prescription frequency — once, twice, or thrice daily.</div>
+      </div>
+      <div class="feature-card" data-animate style="animation:fadeUp 0.5s 0.5s ease both;">
+        <div class="feature-icon" style="background:var(--surface-3);">🏥</div>
+        <div class="feature-title">Doctor Leave Management</div>
+        <div class="feature-desc">When a doctor marks leave, all affected bookings are detected and patients are automatically notified to reschedule.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================
+     PORTALS
+     ============================ -->
+<section class="portals-section" id="portals">
+  <div class="container">
+    <div class="text-center" style="margin-bottom:60px;">
+      <div class="section-label" style="justify-content:center;">✦ Three Portals</div>
+      <h2 class="section-title">Built for every role</h2>
+      <p class="section-desc" style="margin:0 auto;">Separate, role-protected dashboards for patients, doctors, and administrators.</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;" class="portals-grid">
+      <a href="auth/login.html?role=patient" class="portal-card patient">
+        <span class="portal-icon">🧑‍⚕️</span>
+        <div class="portal-title" style="color:#7AB8FF;">Patient Portal</div>
+        <div class="portal-desc">Register, find doctors by specialisation, book slots, share symptoms, and view your AI-powered health summaries.</div>
+        <div class="portal-features">
+          <div class="portal-feature-item">Search doctors by specialisation</div>
+          <div class="portal-feature-item">AI symptom form before booking</div>
+          <div class="portal-feature-item">View pre & post-visit summaries</div>
+          <div class="portal-feature-item">Track medication reminders</div>
+        </div>
+        <div class="badge badge-blue" style="margin-top:24px;display:inline-flex;">Enter Patient Portal →</div>
+      </a>
+
+      <a href="auth/login.html?role=doctor" class="portal-card doctor">
+        <span class="portal-icon">👨‍⚕️</span>
+        <div class="portal-title" style="color:#5FFFD3;">Doctor Portal</div>
+        <div class="portal-desc">View your schedule, read AI pre-visit patient summaries, submit clinical notes, and manage leave days.</div>
+        <div class="portal-features">
+          <div class="portal-feature-item">Today's appointment timeline</div>
+          <div class="portal-feature-item">AI pre-visit urgency summaries</div>
+          <div class="portal-feature-item">Submit post-visit clinical notes</div>
+          <div class="portal-feature-item">Manage schedule & leave</div>
+        </div>
+        <div class="badge badge-green" style="margin-top:24px;display:inline-flex;">Enter Doctor Portal →</div>
+      </a>
+
+      <a href="auth/login.html?role=admin" class="portal-card admin">
+        <span class="portal-icon">🛡️</span>
+        <div class="portal-title" style="color:#C4B5FD;">Admin Portal</div>
+        <div class="portal-desc">Create and manage doctor profiles, oversee all appointments, monitor system health, and review notification logs.</div>
+        <div class="portal-features">
+          <div class="portal-feature-item">Create & manage doctor profiles</div>
+          <div class="portal-feature-item">System-wide appointment oversight</div>
+          <div class="portal-feature-item">Notification delivery logs</div>
+          <div class="portal-feature-item">User & role management</div>
+        </div>
+        <div class="badge badge-purple" style="margin-top:24px;display:inline-flex;">Enter Admin Portal →</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================
+     HOW IT WORKS
+     ============================ -->
+<section class="hiw-section" id="how">
+  <div class="container">
+    <div style="display:flex;gap:80px;align-items:center;flex-wrap:wrap;">
+      <div style="flex:1;min-width:280px;">
+        <div class="section-label">✦ How it Works</div>
+        <h2 class="section-title" style="margin-bottom:16px;">From booking to<br>follow-up in minutes</h2>
+        <p class="section-desc">A seamless end-to-end workflow designed around the needs of both patients and doctors.</p>
+      </div>
+
+      <div style="flex:1.2;min-width:320px;display:flex;flex-direction:column;gap:16px;">
+        <div class="step-card" data-animate style="animation:slideInLeft 0.5s ease both;">
+          <div class="step-number">01</div>
+          <div class="step-body">
+            <div class="step-title">Fill Symptom Form</div>
+            <div class="step-desc">Patient describes symptoms before selecting a slot. AI generates an urgency assessment in real-time.</div>
+          </div>
+        </div>
+        <div class="step-card" data-animate style="animation:slideInLeft 0.5s 0.1s ease both;">
+          <div class="step-number">02</div>
+          <div class="step-body">
+            <div class="step-title">Pick a Doctor & Slot</div>
+            <div class="step-desc">Search by specialisation, view real-time availability, pick a slot — the system prevents double-booking atomically.</div>
+          </div>
+        </div>
+        <div class="step-card" data-animate style="animation:slideInLeft 0.5s 0.2s ease both;">
+          <div class="step-number">03</div>
+          <div class="step-body">
+            <div class="step-title">Confirmation + Calendar</div>
+            <div class="step-desc">Both patient & doctor receive email confirmation. Google Calendar events created automatically.</div>
+          </div>
+        </div>
+        <div class="step-card" data-animate style="animation:slideInLeft 0.5s 0.3s ease both;">
+          <div class="step-number">04</div>
+          <div class="step-body">
+            <div class="step-title">Post-Visit AI Summary</div>
+            <div class="step-desc">Doctor submits notes → AI generates a patient-friendly report with medication schedule and follow-up steps.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================
+     AI ENGINE DEMO
+     ============================ -->
+<section class="ai-section" id="ai">
+  <div class="container">
+    <div style="display:flex;gap:80px;align-items:center;flex-wrap:wrap;">
+      <div style="flex:1;min-width:280px;">
+        <div class="section-label">✦ Gemini AI Engine</div>
+        <h2 class="section-title" style="margin-bottom:16px;">Intelligence at<br>every touchpoint</h2>
+        <p class="section-desc" style="margin-bottom:32px;">Powered by Google Gemini API, the AI layer understands clinical context and produces structured, actionable outputs.</p>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div style="display:flex;align-items:flex-start;gap:14px;">
+            <div style="width:40px;height:40px;border-radius:12px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.1rem;">🎯</div>
+            <div>
+              <div style="font-weight:600;font-size:0.9rem;margin-bottom:4px;">Urgency Classification</div>
+              <div style="font-size:0.82rem;color:var(--text-2);">Low / Medium / High urgency with chief complaint extraction</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:14px;">
+            <div style="width:40px;height:40px;border-radius:12px;background:var(--green-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.1rem;">📝</div>
+            <div>
+              <div style="font-weight:600;font-size:0.9rem;margin-bottom:4px;">Clinical Note Translation</div>
+              <div style="font-size:0.82rem;color:var(--text-2);">Converts medical jargon into patient-friendly language</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:14px;">
+            <div style="width:40px;height:40px;border-radius:12px;background:var(--purple-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.1rem;">🛡️</div>
+            <div>
+              <div style="font-weight:600;font-size:0.9rem;margin-bottom:4px;">Graceful Failure Handling</div>
+              <div style="font-size:0.82rem;color:var(--text-2);">AI failures never break the booking flow — system degrades gracefully</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="flex:1;min-width:300px;">
+        <div class="ai-demo-card">
+          <div class="ai-demo-header">
+            <div class="demo-dot" style="background:#FF5F57;"></div>
+            <div class="demo-dot" style="background:#FEBC2E;"></div>
+            <div class="demo-dot" style="background:#28C840;"></div>
+            <span style="margin-left:8px;font-size:0.75rem;color:var(--text-3);">Gemini AI — Pre-Visit Analysis</span>
+          </div>
+          <div class="ai-demo-body">
+            <div class="ai-prompt">
+              <strong style="color:var(--text-3);font-size:0.72rem;display:block;margin-bottom:6px;">📥 Patient Symptoms Input</strong>
+              "I've been having chest tightness and shortness of breath for the past 3 days. It gets worse when I climb stairs. I also feel slightly dizzy sometimes."
+            </div>
+            <div class="ai-response">
+              <div class="ai-response-label">✦ Gemini AI Response</div>
+              <div class="ai-response-text">
+                <strong>Chief Complaint:</strong> Exertional chest tightness with dyspnea (3 days)<br><br>
+                <strong>Suggested Questions for Doctor:</strong><br>
+                1. Any history of cardiac conditions or hypertension?<br>
+                2. Do symptoms worsen at rest or with specific positions?<br>
+                3. Any associated palpitations or sweating?
+              </div>
+              <div class="urgency-banner">
+                ⚡ Urgency Level: <strong>MEDIUM</strong> — Early medical evaluation recommended
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================
+     CTA SECTION
+     ============================ -->
+<section class="cta-section">
+  <div class="hero-bg">
+    <div class="hero-blob hero-blob-1" style="left:50%;transform:translateX(-50%);opacity:0.08;"></div>
+  </div>
+  <div class="container" style="position:relative;z-index:2;">
+    <div class="section-label" style="justify-content:center;">✦ Get Started Today</div>
+    <h2 class="section-title" style="margin-bottom:16px;">Ready to transform<br>healthcare management?</h2>
+    <p class="section-desc" style="margin:0 auto 40px;">Join patients and doctors already using YourHealth.AI for smarter, AI-powered healthcare experiences.</p>
+    <div style="display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;">
+      <a href="auth/register.html" class="btn btn-primary btn-xl">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        Register as Patient
+      </a>
+      <a href="auth/login.html" class="btn btn-outline btn-xl">Log In to Portal</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================
+     FOOTER
+     ============================ -->
+<footer class="footer">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;flex-wrap:wrap;" class="footer-grid">
+      <div>
+        <div class="footer-logo">YourHealth<span style="color:var(--accent);">.</span>AI</div>
+        <div class="footer-desc">An AI-powered healthcare appointment & follow-up manager. Built as a final year engineering project.</div>
+        <div style="display:flex;gap:12px;margin-top:20px;">
+          <div class="badge badge-blue">Built with Gemini AI</div>
+          <div class="badge badge-green">Node.js Backend</div>
+        </div>
+      </div>
+      <div>
+        <div class="footer-heading">Portals</div>
+        <a href="auth/register.html" class="footer-link">Patient Portal</a>
+        <a href="auth/login.html?role=doctor" class="footer-link">Doctor Portal</a>
+        <a href="auth/login.html?role=admin" class="footer-link">Admin Portal</a>
+      </div>
+      <div>
+        <div class="footer-heading">Features</div>
+        <a href="#ai" class="footer-link">AI Summaries</a>
+        <a href="#features" class="footer-link">Smart Booking</a>
+        <a href="#features" class="footer-link">Reminders</a>
+        <a href="#features" class="footer-link">Calendar Sync</a>
+      </div>
+      <div>
+        <div class="footer-heading">Tech Stack</div>
+        <a href="#" class="footer-link">Node.js + Express</a>
+        <a href="#" class="footer-link">PostgreSQL</a>
+        <a href="#" class="footer-link">Google Gemini API</a>
+        <a href="#" class="footer-link">Google Calendar API</a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2026 YourHealth.AI — Final Year Project. Built with ❤️ and AI.</div>
+      <div style="display:flex;gap:20px;">
+        <a href="#" class="footer-copy" style="transition:color 0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color=''">Privacy</a>
+        <a href="#" class="footer-copy" style="transition:color 0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color=''">Terms</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/api.js"></script>
+<script>
+  // Redirect logged-in users to their portal
+  if (Auth.isLoggedIn()) {
+    const portals = {
+      patient: 'patient/dashboard.html',
+      doctor:  'doctor/dashboard.html',
+      admin:   'admin/dashboard.html'
+    };
+    const dest = portals[Auth.role];
+    if (dest) window.location.href = dest;
+  }
+</script>
+</body>
+</html>

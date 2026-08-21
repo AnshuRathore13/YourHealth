@@ -1,0 +1,62 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.generatePostVisitSummary = exports.generatePreVisitSummary = void 0;
+const generative_ai_1 = require("@google/generative-ai");
+const apiKey = process.env.GEMINI_API_KEY || "";
+const genAI = new generative_ai_1.GoogleGenerativeAI(apiKey);
+const generatePreVisitSummary = async (symptoms) => {
+    if (!apiKey || apiKey === "placeholder") {
+        // Graceful handling of LLM failure / Missing API key
+        return {
+            urgencyLevel: "Medium",
+            preVisitSummary: "LLM API Key missing. Patient reported: " + symptoms
+        };
+    }
+    try {
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const prompt = `Analyse these symptoms and return: urgency level (Low / Medium / High), chief complaint, and three suggested questions for the doctor. Format as JSON with keys: urgencyLevel, summary. Symptoms: ${symptoms}`;
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+        try {
+            // Basic extraction if it returns markdown json
+            const jsonStr = text.replace(/```json\n?|\n?```/g, "").trim();
+            const parsed = JSON.parse(jsonStr);
+            return {
+                urgencyLevel: parsed.urgencyLevel || "Medium",
+                preVisitSummary: parsed.summary || text
+            };
+        }
+        catch (e) {
+            return {
+                urgencyLevel: "Medium",
+                preVisitSummary: text
+            };
+        }
+    }
+    catch (error) {
+        console.error("Gemini API error:", error);
+        return {
+            urgencyLevel: "Medium",
+            preVisitSummary: "Failed to generate AI summary. Symptoms: " + symptoms
+        };
+    }
+};
+exports.generatePreVisitSummary = generatePreVisitSummary;
+const generatePostVisitSummary = async (notes) => {
+    if (!apiKey || apiKey === "placeholder") {
+        return "LLM API Key missing. Clinical notes: " + notes;
+    }
+    try {
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const prompt = `Convert these clinical notes into a patient-friendly summary with medication schedule and follow-up steps: ${notes}`;
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        return response.text();
+    }
+    catch (error) {
+        console.error("Gemini API error:", error);
+        return "Failed to generate AI summary from notes: " + notes;
+    }
+};
+exports.generatePostVisitSummary = generatePostVisitSummary;

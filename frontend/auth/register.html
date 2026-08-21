@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register — YourHealth.AI</title>
+  <meta name="description" content="Create your free YourHealth.AI patient account.">
+  <link rel="stylesheet" href="../assets/css/design-system.css">
+  <style>
+    body { min-height: 100vh; display: flex; align-items: stretch; }
+    .auth-left {
+      flex: 1; background: var(--bg-alt); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; justify-content: center;
+      padding: 60px 56px; position: relative; overflow: hidden;
+    }
+    .auth-right {
+      flex: 1.2; display: flex; flex-direction: column; justify-content: center;
+      padding: 60px 56px; overflow-y: auto;
+    }
+    .auth-logo { font-size:1.2rem;font-weight:800;letter-spacing:-0.04em;margin-bottom:40px;display:flex;align-items:center;gap:8px; }
+    .auth-title { font-size:1.8rem;font-weight:800;letter-spacing:-0.04em;margin-bottom:6px; }
+    .auth-subtitle { font-size:0.88rem;color:var(--text-2);margin-bottom:28px; }
+    .form-row { display:grid;grid-template-columns:1fr 1fr;gap:16px; }
+    .progress-steps {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 28px;
+    }
+    .progress-step {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.78rem; font-weight: 600; color: var(--text-3);
+    }
+    .progress-step .step-num {
+      width: 24px; height: 24px; border-radius: 50%;
+      border: 1px solid var(--border); display: flex; align-items: center;
+      justify-content: center; font-size: 0.7rem; transition: all var(--t-base);
+    }
+    .progress-step.active .step-num { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .progress-step.done .step-num { background: var(--green); border-color: var(--green); color: #080810; }
+    .progress-step.active { color: var(--text); }
+    .progress-line { flex: 1; height: 1px; background: var(--border); }
+    .step-panel { display: none; }
+    .step-panel.active { display: block; }
+    @media (max-width: 768px) {
+      body { flex-direction: column; }
+      .auth-left { display: none; }
+      .auth-right { padding: 32px 20px; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Left panel -->
+<div class="auth-left">
+  <div class="hero-bg" style="opacity:0.5;">
+    <div class="hero-blob hero-blob-2" style="width:400px;height:400px;top:0;right:-100px;"></div>
+    <div class="hero-blob hero-blob-3" style="width:300px;height:300px;bottom:-50px;left:0;"></div>
+  </div>
+  <div class="auth-logo" style="position:relative;z-index:2;">
+    <span class="logo-dot"></span>
+    YourHealth<span style="color:var(--accent)">.</span>AI
+  </div>
+  <div style="position:relative;z-index:2;margin-bottom:36px;">
+    <h1 class="section-title" style="font-size:2rem;margin-bottom:12px;">Start your health<br>journey today</h1>
+    <p style="font-size:0.88rem;color:var(--text-2);line-height:1.6;">Create your free account in minutes. AI-powered, secure, and designed for modern healthcare.</p>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:16px;position:relative;z-index:2;">
+    <div style="display:flex;align-items:center;gap:12px;padding:16px;background:var(--surface-2);border:1px solid var(--border);border-radius:16px;">
+      <span style="font-size:1.3rem;">🔒</span>
+      <div>
+        <div style="font-size:0.85rem;font-weight:600;">Secure & Private</div>
+        <div style="font-size:0.78rem;color:var(--text-2);">JWT auth, role-based access control</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;padding:16px;background:var(--surface-2);border:1px solid var(--border);border-radius:16px;">
+      <span style="font-size:1.3rem;">⚡</span>
+      <div>
+        <div style="font-size:0.85rem;font-weight:600;">Instant AI Analysis</div>
+        <div style="font-size:0.78rem;color:var(--text-2);">Symptom summary before your first visit</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;padding:16px;background:var(--surface-2);border:1px solid var(--border);border-radius:16px;">
+      <span style="font-size:1.3rem;">📅</span>
+      <div>
+        <div style="font-size:0.85rem;font-weight:600;">Calendar Integration</div>
+        <div style="font-size:0.78rem;color:var(--text-2);">Appointments sync to Google Calendar</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Right panel: Multi-step registration -->
+<div class="auth-right">
+
+  <!-- Progress steps -->
+  <div class="progress-steps" id="progress">
+    <div class="progress-step active" id="step-indicator-1">
+      <div class="step-num">1</div>
+      <span>Account</span>
+    </div>
+    <div class="progress-line"></div>
+    <div class="progress-step" id="step-indicator-2">
+      <div class="step-num">2</div>
+      <span>Personal</span>
+    </div>
+    <div class="progress-line"></div>
+    <div class="progress-step" id="step-indicator-3">
+      <div class="step-num">3</div>
+      <span>Done</span>
+    </div>
+  </div>
+
+  <form id="register-form" onsubmit="handleRegister(event)">
+
+    <!-- STEP 1: Account -->
+    <div class="step-panel active" id="step-1">
+      <h2 class="auth-title">Create your account</h2>
+      <p class="auth-subtitle">Patient registration — it's free & takes 2 minutes</p>
+
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="fname">First Name</label>
+            <input class="form-input" type="text" id="fname" placeholder="Aarav" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="lname">Last Name</label>
+            <input class="form-input" type="text" id="lname" placeholder="Shah" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reg-email">Email Address</label>
+          <input class="form-input" type="email" id="reg-email" placeholder="aarav@example.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reg-phone">Phone Number</label>
+          <input class="form-input" type="tel" id="reg-phone" placeholder="+91 98765 43210">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reg-password">Password</label>
+          <input class="form-input" type="password" id="reg-password" placeholder="Min 8 characters" required minlength="8">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reg-confirm">Confirm Password</label>
+          <input class="form-input" type="password" id="reg-confirm" placeholder="Re-enter password" required>
+        </div>
+        <button type="button" onclick="nextStep()" class="btn btn-primary w-full" style="justify-content:center;padding:14px;margin-top:4px;">
+          Continue →
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Personal Info -->
+    <div class="step-panel" id="step-2">
+      <h2 class="auth-title">Your health profile</h2>
+      <p class="auth-subtitle">This helps doctors better understand your context</p>
+
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="dob">Date of Birth</label>
+            <input class="form-input" type="date" id="dob">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="gender">Gender</label>
+            <select class="form-select" id="gender">
+              <option value="">Select</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+              <option value="prefer-not">Prefer not to say</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="blood-group">Blood Group (optional)</label>
+          <select class="form-select" id="blood-group">
+            <option value="">Select blood group</option>
+            <option>A+</option><option>A-</option>
+            <option>B+</option><option>B-</option>
+            <option>AB+</option><option>AB-</option>
+            <option>O+</option><option>O-</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="allergies">Known Allergies (optional)</label>
+          <input class="form-input" type="text" id="allergies" placeholder="e.g. Penicillin, Peanuts">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="conditions">Existing Conditions (optional)</label>
+          <textarea class="form-input form-textarea" id="conditions" placeholder="e.g. Diabetes Type 2, Hypertension" style="min-height:80px;"></textarea>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:14px;background:var(--accent-dim);border:1px solid rgba(74,142,245,0.2);border-radius:14px;">
+          <span>📅</span>
+          <div style="font-size:0.82rem;color:var(--text-2);">You can connect Google Calendar after registration to auto-sync your appointments.</div>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:4px;">
+          <button type="button" onclick="prevStep()" class="btn btn-outline" style="flex:1;justify-content:center;">← Back</button>
+          <button type="submit" class="btn btn-primary" style="flex:2;justify-content:center;padding:14px;" id="register-btn">
+            Create My Account ✦
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: Success -->
+    <div class="step-panel" id="step-3" style="text-align:center;padding:20px 0;">
+      <div style="font-size:4rem;margin-bottom:20px;animation:scaleIn 0.5s var(--t-spring) both;">🎉</div>
+      <h2 class="auth-title" style="text-align:center;">You're all set!</h2>
+      <p style="font-size:0.9rem;color:var(--text-2);margin-bottom:32px;">Your YourHealth.AI account has been created successfully.</p>
+      <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:20px;padding:24px;text-align:left;margin-bottom:28px;">
+        <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-3);margin-bottom:16px;">What's next?</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div style="display:flex;align-items:center;gap:10px;font-size:0.85rem;">
+            <div class="badge badge-green">01</div> Find doctors by specialisation
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:0.85rem;">
+            <div class="badge badge-blue">02</div> Fill in your symptoms & book a slot
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:0.85rem;">
+            <div class="badge badge-purple">03</div> Get AI pre-visit summary instantly
+          </div>
+        </div>
+      </div>
+      <a href="../patient/dashboard.html" class="btn btn-primary btn-lg w-full" style="justify-content:center;">
+        Go to My Dashboard →
+      </a>
+    </div>
+
+  </form>
+
+  <div id="reg-error" style="display:none;background:var(--red-dim);border:1px solid rgba(247,79,106,0.3);border-radius:var(--r-md);padding:12px 16px;margin-top:16px;font-size:0.85rem;color:var(--red);"></div>
+
+  <div style="text-align:center;margin-top:20px;font-size:0.83rem;color:var(--text-2);">
+    Already have an account? <a href="login.html" style="color:var(--accent);font-weight:600;">Sign in →</a>
+  </div>
+</div>
+
+<div class="toast-container"></div>
+<script src="../assets/js/api.js"></script>
+<script>
+  let currentStep = 1;
+
+  function nextStep() {
+    // Validate step 1
+    const pw  = document.getElementById('reg-password').value;
+    const cpw = document.getElementById('reg-confirm').value;
+    if (pw !== cpw) { showRegError('Passwords do not match.'); return; }
+    if (!document.getElementById('reg-email').value) { showRegError('Please enter your email.'); return; }
+    clearRegError();
+    goToStep(2);
+  }
+
+  function prevStep() { goToStep(1); }
+
+  function goToStep(n) {
+    document.getElementById(`step-${currentStep}`).classList.remove('active');
+    document.getElementById(`step-indicator-${currentStep}`).classList.remove('active');
+    document.getElementById(`step-indicator-${currentStep}`).classList.add('done');
+    currentStep = n;
+    document.getElementById(`step-${n}`).classList.add('active');
+    document.getElementById(`step-indicator-${n}`).classList.add('active');
+    document.getElementById(`step-indicator-${n}`).classList.remove('done');
+  }
+
+  async function handleRegister(e) {
+    e.preventDefault();
+    const btn = document.getElementById('register-btn');
+    Loader.show(btn, 'Creating account...');
+    clearRegError();
+
+    const payload = {
+      firstName: document.getElementById('fname').value,
+      lastName:  document.getElementById('lname').value,
+      email:     document.getElementById('reg-email').value,
+      phone:     document.getElementById('reg-phone').value,
+      password:  document.getElementById('reg-password').value,
+      dob:       document.getElementById('dob').value,
+      gender:    document.getElementById('gender').value,
+      bloodGroup:document.getElementById('blood-group').value,
+      allergies: document.getElementById('allergies').value,
+      conditions:document.getElementById('conditions').value,
+      role: 'patient',
+    };
+
+    try {
+      const res = await api.auth.register(payload);
+      Auth.save(res.token, res.user);
+      goToStep(3);
+      // Update indicator 3
+      document.getElementById('step-indicator-3').classList.add('active');
+    } catch (err) {
+      showRegError(err.message);
+    } finally {
+      Loader.hide(btn);
+    }
+  }
+
+  function showRegError(msg) {
+    const el = document.getElementById('reg-error');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+  function clearRegError() {
+    document.getElementById('reg-error').style.display = 'none';
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Doctors — YourHealth.AI</title>
+  <link rel="stylesheet" href="../assets/css/design-system.css">
+  <link rel="stylesheet" href="../assets/css/portal.css">
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<!-- Add/Edit Doctor Modal -->
+<div class="modal-overlay" id="doctor-modal">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Add New Doctor</div>
+      <div class="modal-close" onclick="closeModal()">✕</div>
+    </div>
+    <form id="doctor-form" onsubmit="saveDoctorForm(event)">
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" type="text" id="doc-name" placeholder="Dr. Ramesh Sharma" required></div>
+          <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="doc-email" placeholder="doctor@hospital.com" required></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div class="form-group">
+            <label class="form-label">Specialisation</label>
+            <select class="form-select form-input" id="doc-spec" required>
+              <option value="">Select specialisation</option>
+              <option>Cardiologist</option><option>Dermatologist</option>
+              <option>Neurologist</option><option>Orthopedist</option>
+              <option>General Physician</option><option>Pediatrician</option>
+              <option>Gynecologist</option><option>Psychiatrist</option>
+              <option>Ophthalmologist</option><option>ENT Specialist</option>
+            </select>
+          </div>
+          <div class="form-group"><label class="form-label">Phone</label><input class="form-input" type="tel" id="doc-phone" placeholder="+91 98765 43210"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">
+          <div class="form-group"><label class="form-label">Slot Duration (min)</label><select class="form-select form-input" id="doc-slot"><option value="15">15</option><option value="20">20</option><option value="30" selected>30</option><option value="45">45</option><option value="60">60</option></select></div>
+          <div class="form-group"><label class="form-label">Consultation Fee (₹)</label><input class="form-input" type="number" id="doc-fee" placeholder="500" min="0"></div>
+          <div class="form-group"><label class="form-label">Experience (yrs)</label><input class="form-input" type="number" id="doc-exp" placeholder="10" min="0"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div class="form-group"><label class="form-label">Working Hours Start</label><input class="form-input" type="time" id="doc-start" value="09:00"></div>
+          <div class="form-group"><label class="form-label">Working Hours End</label><input class="form-input" type="time" id="doc-end" value="17:00"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Bio / About</label><textarea class="form-input form-textarea" id="doc-bio" placeholder="Brief professional biography..." style="min-height:70px;"></textarea></div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:20px;">
+        <button type="button" onclick="closeModal()" class="btn btn-outline">Cancel</button>
+        <button type="submit" class="btn" id="save-doc-btn" style="flex:1;justify-content:center;background:var(--purple);color:#fff;font-weight:700;">Save Doctor</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="portal-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><span class="logo-dot" style="background:var(--purple);box-shadow:0 0 8px var(--purple);"></span>YourHealth<span style="color:var(--purple)">.</span>AI</div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="sidebar-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+      <a href="doctors.html" class="sidebar-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Doctors</a>
+      <a href="#" class="sidebar-item" onclick="Toast.info('Coming Soon', 'This module will be available in V2.')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/></svg>
+        All Appointments
+      </a>
+      <a href="#" class="sidebar-item" onclick="Toast.info('Coming Soon', 'This module will be available in V2.')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+        Notification Logs
+      </a>
+      <a href="#" class="sidebar-item" onclick="Toast.info('Coming Soon', 'This module will be available in V2.')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+        System Health
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user" onclick="Auth.logout()">
+        <div class="avatar" id="user-avatar" style="background:var(--purple-dim);color:var(--purple);">A</div>
+        <div><div style="font-size:0.85rem;font-weight:600;" id="user-name">Admin</div><div style="font-size:0.72rem;color:var(--text-3);">Log out</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="portal-main">
+    <header class="portal-header">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <button class="btn btn-ghost btn-sm" id="sidebar-toggle" style="padding:8px;border-radius:10px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="topbar-search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" id="doc-search" placeholder="Search doctors..." oninput="filterDocs()">
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <div class="notif-bell" onclick="Toast.info('All Caught Up!', 'There are no new alerts.')" style="cursor:pointer; font-size: 1.2rem;">🔔</div>
+        <button onclick="openAddModal()" class="btn" style="background:var(--purple);color:#fff;font-weight:700;border-radius:var(--r-full);padding:9px 20px;font-size:0.88rem;">+ Add Doctor</button>
+      </div>
+    </header>
+
+    <div class="portal-content">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <div class="page-title" style="font-size:1.2rem;">Doctor Profiles</div>
+          <div class="page-subtitle" id="doc-count-label">Loading...</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;" id="spec-filter-row">
+          <div class="filter-pill active" onclick="filterSpec('all',this)">All</div>
+          <div class="filter-pill" onclick="filterSpec('Cardiologist',this)">Cardiology</div>
+          <div class="filter-pill" onclick="filterSpec('Dermatologist',this)">Dermatology</div>
+          <div class="filter-pill" onclick="filterSpec('Neurologist',this)">Neurology</div>
+          <div class="filter-pill" onclick="filterSpec('General Physician',this)">General</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;" id="doctors-admin-grid">
+        <div class="skeleton" style="height:200px;border-radius:24px;"></div>
+        <div class="skeleton" style="height:200px;border-radius:24px;"></div>
+        <div class="skeleton" style="height:200px;border-radius:24px;"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<style>
+  .filter-pill { padding:7px 16px;border-radius:var(--r-full);border:1px solid var(--border);background:var(--surface-2);font-size:0.8rem;font-weight:600;color:var(--text-2);cursor:pointer;transition:all var(--t-fast); }
+  .filter-pill:hover,.filter-pill.active { border-color:var(--purple);background:var(--purple-dim);color:var(--purple); }
+  .doc-admin-card { background:var(--surface-2);border:1px solid var(--border);border-radius:24px;padding:24px;transition:all var(--t-base); }
+  .doc-admin-card:hover { border-color:var(--border-hover);transform:translateY(-3px);box-shadow:var(--shadow-md); }
+</style>
+<div class="toast-container"></div>
+<script src="../assets/js/api.js"></script>
+<script>
+  if (!Auth.requireRole('admin')) {}
+  const user = Auth.user;
+  if (user) {
+    document.getElementById('user-name').textContent = user.firstName || user.name;
+    document.getElementById('user-avatar').textContent = (user.firstName?.[0] || 'A').toUpperCase();
+  }
+
+  let allDoctors = [];
+  let editingDocId = null;
+
+  async function loadDoctors() {
+    try {
+      const res = await api.admin.doctors();
+      allDoctors = res.data || res || [];
+      renderDoctors(allDoctors);
+    } catch {
+      allDoctors = MOCK_DOCTORS;
+      renderDoctors(MOCK_DOCTORS);
+    }
+  }
+
+  function renderDoctors(list) {
+    document.getElementById('doc-count-label').textContent = `${list.length} doctor${list.length !== 1 ? 's' : ''} registered`;
+    const grid = document.getElementById('doctors-admin-grid');
+    if (!list.length) {
+      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--text-3);">No doctors found. <button onclick="openAddModal()" style="color:var(--purple);background:none;border:none;cursor:pointer;font-weight:600;font-size:inherit;">Add one →</button></div>`;
+      return;
+    }
+    grid.innerHTML = list.map(doc => `
+      <div class="doc-admin-card">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+          <div class="avatar avatar-lg" style="background:var(--purple-dim);color:var(--purple);">${doc.name?.[0]||'D'}</div>
+          <div style="flex:1;">
+            <div style="font-weight:700;font-size:0.95rem;">Dr. ${doc.name}</div>
+            <div style="font-size:0.78rem;color:var(--text-2);">${doc.specialisation}</div>
+            <div class="badge badge-purple" style="font-size:0.65rem;margin-top:4px;">${doc.experience||5}+ yrs exp</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+          <div style="font-size:0.75rem;"><span style="color:var(--text-3);">Slot:</span> <strong>${doc.slotDuration||30} min</strong></div>
+          <div style="font-size:0.75rem;"><span style="color:var(--text-3);">Fee:</span> <strong>₹${doc.fee||500}</strong></div>
+          <div style="font-size:0.75rem;"><span style="color:var(--text-3);">Hours:</span> <strong>${doc.workStart||'09:00'}–${doc.workEnd||'17:00'}</strong></div>
+          <div style="font-size:0.75rem;"><span style="color:var(--text-3);">Status:</span> <span class="badge badge-green" style="font-size:0.6rem;">Active</span></div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="openEditModal(${JSON.stringify(doc).replace(/"/g,'&quot;')})" class="btn btn-outline btn-sm" style="flex:1;justify-content:center;">✏️ Edit</button>
+          <button onclick="deleteDoc(${doc.id})" class="btn btn-danger btn-sm" style="padding:8px 12px;">🗑</button>
+        </div>
+      </div>`).join('');
+  }
+
+  function filterDocs() {
+    const q = document.getElementById('doc-search').value.toLowerCase();
+    renderDoctors(allDoctors.filter(d => d.name.toLowerCase().includes(q) || d.specialisation.toLowerCase().includes(q)));
+  }
+
+  function filterSpec(spec, el) {
+    document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    renderDoctors(spec === 'all' ? allDoctors : allDoctors.filter(d => d.specialisation === spec));
+  }
+
+  function openAddModal() {
+    editingDocId = null;
+    document.getElementById('modal-title').textContent = 'Add New Doctor';
+    document.getElementById('doctor-form').reset();
+    document.getElementById('doctor-modal').classList.add('open');
+  }
+
+  function openEditModal(doc) {
+    editingDocId = doc.id;
+    document.getElementById('modal-title').textContent = `Edit — Dr. ${doc.name}`;
+    document.getElementById('doc-name').value  = doc.name || '';
+    document.getElementById('doc-email').value = doc.email || '';
+    document.getElementById('doc-spec').value  = doc.specialisation || '';
+    document.getElementById('doc-phone').value = doc.phone || '';
+    document.getElementById('doc-slot').value  = doc.slotDuration || 30;
+    document.getElementById('doc-fee').value   = doc.fee || '';
+    document.getElementById('doc-exp').value   = doc.experience || '';
+    document.getElementById('doc-start').value = doc.workStart || '09:00';
+    document.getElementById('doc-end').value   = doc.workEnd || '17:00';
+    document.getElementById('doc-bio').value   = doc.bio || '';
+    document.getElementById('doctor-modal').classList.add('open');
+  }
+
+  function closeModal() { document.getElementById('doctor-modal').classList.remove('open'); }
+
+  async function saveDoctorForm(e) {
+    e.preventDefault();
+    const btn = document.getElementById('save-doc-btn');
+    Loader.show(btn, 'Saving...');
+    const payload = {
+      name:          document.getElementById('doc-name').value,
+      email:         document.getElementById('doc-email').value,
+      specialisation:document.getElementById('doc-spec').value,
+      phone:         document.getElementById('doc-phone').value,
+      slotDuration:  parseInt(document.getElementById('doc-slot').value),
+      fee:           parseInt(document.getElementById('doc-fee').value),
+      experience:    parseInt(document.getElementById('doc-exp').value),
+      workStart:     document.getElementById('doc-start').value,
+      workEnd:       document.getElementById('doc-end').value,
+      bio:           document.getElementById('doc-bio').value,
+    };
+    try {
+      if (editingDocId) {
+        await api.doctors.update(editingDocId, payload);
+        Toast.success('Updated!', `Dr. ${payload.name} profile updated.`);
+      } else {
+        await api.doctors.create(payload);
+        Toast.success('Added!', `Dr. ${payload.name} has been added.`);
+      }
+      closeModal();
+      loadDoctors();
+    } catch {
+      // Demo fallback
+      const idx = allDoctors.findIndex(d => d.id === editingDocId);
+      if (idx > -1) { allDoctors[idx] = { ...allDoctors[idx], ...payload }; }
+      else { allDoctors.push({ id: Date.now(), ...payload }); }
+      renderDoctors(allDoctors);
+      closeModal();
+      Toast.success('Demo', `Dr. ${payload.name} ${editingDocId ? 'updated' : 'added'} (demo mode).`);
+    } finally {
+      Loader.hide(btn);
+    }
+  }
+
+  async function deleteDoc(id) {
+    if (!confirm('Delete this doctor profile? All their appointments will be affected.')) return;
+    try {
+      await api.doctors.delete(id);
+      Toast.success('Deleted', 'Doctor profile removed.');
+      loadDoctors();
+    } catch {
+      allDoctors = allDoctors.filter(d => d.id !== id);
+      renderDoctors(allDoctors);
+      Toast.success('Demo', 'Doctor removed (demo mode).');
+    }
+  }
+
+  document.getElementById('doctor-modal').addEventListener('click', e => { if(e.target.id === 'doctor-modal') closeModal(); });
+
+  const MOCK_DOCTORS = [
+    { id:1, name:'Ramesh Sharma', specialisation:'Cardiologist', email:'ramesh@hospital.com', slotDuration:30, fee:600, experience:15, workStart:'09:00', workEnd:'17:00' },
+    { id:2, name:'Priya Menon',   specialisation:'Dermatologist', email:'priya@hospital.com', slotDuration:20, fee:400, experience:8,  workStart:'10:00', workEnd:'16:00' },
+    { id:3, name:'Anil Kumar',    specialisation:'Neurologist',   email:'anil@hospital.com',  slotDuration:40, fee:800, experience:20, workStart:'09:00', workEnd:'15:00' },
+    { id:4, name:'Sneha Joshi',   specialisation:'Orthopedist',   email:'sneha@hospital.com', slotDuration:30, fee:550, experience:12, workStart:'09:00', workEnd:'17:00' },
+    { id:5, name:'Vikram Bose',   specialisation:'General Physician', email:'vikram@hospital.com', slotDuration:15, fee:300, experience:6, workStart:'08:00', workEnd:'18:00' },
+    { id:6, name:'Asha Nair',     specialisation:'Pediatrician', email:'asha@hospital.com',   slotDuration:25, fee:450, experience:10, workStart:'09:00', workEnd:'16:00' },
+  ];
+
+  loadDoctors();
+</script>
+</body>
+</html>

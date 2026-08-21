@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Appointments — YourHealth.AI</title>
+  <link rel="stylesheet" href="../assets/css/design-system.css">
+  <link rel="stylesheet" href="../assets/css/portal.css">
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<div class="portal-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><span class="logo-dot"></span>YourHealth<span style="color:var(--accent)">.</span>AI</div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="sidebar-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+      <a href="book.html" class="sidebar-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/></svg>Book Appointment</a>
+      <a href="appointments.html" class="sidebar-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>My Appointments</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user" onclick="Auth.logout()">
+        <div class="avatar" id="user-avatar">P</div>
+        <div><div style="font-size:0.85rem;font-weight:600;" id="user-name">Patient</div><div style="font-size:0.72rem;color:var(--text-3);">Log out</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="portal-main">
+    <header class="portal-header">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <button class="btn btn-ghost btn-sm" id="sidebar-toggle" style="padding:8px;border-radius:10px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div><div class="page-title" style="font-size:1.2rem;">My Appointments</div><div class="page-subtitle">All your past and upcoming visits</div></div>
+      </div>
+      <a href="book.html" class="btn btn-primary btn-sm">+ Book New</a>
+    </header>
+
+    <div class="portal-content">
+      <!-- Status filter tabs -->
+      <div style="display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap;">
+        <div class="filter-pill active" onclick="filterApts('all',this)">All</div>
+        <div class="filter-pill" onclick="filterApts('confirmed',this)">🔵 Upcoming</div>
+        <div class="filter-pill" onclick="filterApts('completed',this)">✅ Completed</div>
+        <div class="filter-pill" onclick="filterApts('cancelled',this)">❌ Cancelled</div>
+      </div>
+
+      <!-- Appointment detail modal -->
+      <div class="modal-overlay" id="apt-modal">
+        <div class="modal" style="max-width:640px;">
+          <div class="modal-header">
+            <div class="modal-title" id="modal-title">Appointment Details</div>
+            <div class="modal-close" onclick="closeModal()">✕</div>
+          </div>
+          <div id="modal-body"><!-- Populated by JS --></div>
+        </div>
+      </div>
+
+      <!-- Appointments table -->
+      <div class="table-wrap" id="apts-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Doctor</th>
+              <th>Date & Time</th>
+              <th>Specialisation</th>
+              <th>Urgency</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="apts-tbody">
+            <tr><td colspan="6"><div class="skeleton" style="height:40px;border-radius:8px;margin:8px 0;"></div></td></tr>
+            <tr><td colspan="6"><div class="skeleton" style="height:40px;border-radius:8px;margin:8px 0;"></div></td></tr>
+            <tr><td colspan="6"><div class="skeleton" style="height:40px;border-radius:8px;margin:8px 0;"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<style>
+  .filter-pill { padding:7px 16px;border-radius:var(--r-full);border:1px solid var(--border);background:var(--surface-2);font-size:0.8rem;font-weight:600;color:var(--text-2);cursor:pointer;transition:all var(--t-fast); }
+  .filter-pill:hover,.filter-pill.active { border-color:var(--accent);background:var(--accent-dim);color:var(--accent); }
+</style>
+<div class="toast-container"></div>
+<script src="../assets/js/api.js"></script>
+<script>
+  if (!Auth.requireRole('patient')) {}
+  const user = Auth.user;
+  if (user) {
+    document.getElementById('user-name').textContent = user.firstName || user.name;
+    document.getElementById('user-avatar').textContent = (user.firstName?.[0] || 'P').toUpperCase();
+  }
+
+  let allApts = [];
+
+  async function loadApts() {
+    try {
+      const res = await api.patient.appointments();
+      allApts = res.data || res || [];
+      renderApts(allApts);
+    } catch {
+      allApts = MOCK_APTS;
+      renderApts(MOCK_APTS);
+    }
+  }
+
+  function filterApts(status, el) {
+    document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    const filtered = status === 'all' ? allApts : allApts.filter(a => a.status === status);
+    renderApts(filtered);
+  }
+
+  function renderApts(list) {
+    const tbody = document.getElementById('apts-tbody');
+    if (!list.length) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-3);">No appointments found. <a href="book.html" style="color:var(--accent);font-weight:600;">Book one →</a></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = list.map(apt => {
+      const urgency = Format.urgency(apt.urgency || 'Low');
+      return `<tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="avatar" style="width:32px;height:32px;font-size:0.78rem;">${(apt.doctorName || apt.doctor?.name || 'D')[0]}</div>
+            <div style="font-weight:600;font-size:0.88rem;">Dr. ${apt.doctorName || apt.doctor?.name || 'Unknown'}</div>
+          </div>
+        </td>
+        <td style="font-size:0.85rem;">${Format.date(apt.datetime||apt.date)}<br><span style="color:var(--text-3);font-size:0.75rem;">${Format.time(apt.datetime||apt.date)}</span></td>
+        <td style="font-size:0.83rem;color:var(--text-2);">${apt.specialisation||apt.doctor?.specialisation||'General'}</td>
+        <td><span class="badge ${urgency.class}"><span class="urgency-dot ${urgency.dot}"></span>${urgency.label}</span></td>
+        <td><span class="badge ${Format.status(apt.status)}">${apt.status}</span></td>
+        <td>
+          <div style="display:flex;gap:6px;">
+            <button onclick="viewApt(${JSON.stringify(apt).replace(/"/g,'&quot;')})" class="btn btn-ghost btn-sm" style="padding:6px 10px;font-size:0.78rem;">View</button>
+            ${apt.status === 'confirmed' ? `<button onclick="cancelApt(${apt.id})" class="btn btn-danger btn-sm" style="padding:6px 10px;font-size:0.78rem;">Cancel</button>` : ''}
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  function viewApt(apt) {
+    const urgency = Format.urgency(apt.urgency || 'Low');
+    document.getElementById('modal-title').textContent = `Dr. ${apt.doctorName || 'Doctor'} — ${Format.date(apt.datetime||apt.date)}`;
+    document.getElementById('modal-body').innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div><div class="form-label">Date</div><div style="font-size:0.9rem;font-weight:600;">${Format.date(apt.datetime||apt.date)}</div></div>
+          <div><div class="form-label">Time</div><div style="font-size:0.9rem;font-weight:600;">${Format.time(apt.datetime||apt.date)}</div></div>
+          <div><div class="form-label">Doctor</div><div style="font-size:0.9rem;font-weight:600;">Dr. ${apt.doctorName||'Unknown'}</div></div>
+          <div><div class="form-label">Specialisation</div><div style="font-size:0.9rem;font-weight:600;">${apt.specialisation||'General'}</div></div>
+          <div><div class="form-label">Status</div><span class="badge ${Format.status(apt.status)}">${apt.status}</span></div>
+          <div><div class="form-label">Urgency</div><span class="badge ${urgency.class}"><span class="urgency-dot ${urgency.dot}"></span>${urgency.label}</span></div>
+        </div>
+        ${apt.preVisitSummary ? `
+          <div style="background:var(--accent-dim);border:1px solid rgba(74,142,245,0.2);border-radius:14px;padding:14px;">
+            <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--accent);margin-bottom:8px;">🧠 AI Pre-Visit Summary</div>
+            <div style="font-size:0.85rem;color:var(--text);line-height:1.6;">${apt.preVisitSummary}</div>
+          </div>` : ''}
+        ${apt.postVisitSummary ? `
+          <div style="background:var(--green-dim);border:1px solid rgba(0,217,163,0.2);border-radius:14px;padding:14px;">
+            <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--green);margin-bottom:8px;">📋 Post-Visit Summary</div>
+            <div style="font-size:0.85rem;color:var(--text);line-height:1.6;">${apt.postVisitSummary}</div>
+          </div>` : ''}
+      </div>`;
+    document.getElementById('apt-modal').classList.add('open');
+  }
+
+  function closeModal() { document.getElementById('apt-modal').classList.remove('open'); }
+  document.getElementById('apt-modal').addEventListener('click', (e) => { if (e.target.id === 'apt-modal') closeModal(); });
+
+  async function cancelApt(id) {
+    if (!confirm('Are you sure you want to cancel this appointment?')) return;
+    try {
+      await api.appointments.cancel(id, 'Patient requested cancellation');
+      Toast.success('Cancelled', 'Your appointment has been cancelled. A notification has been sent.');
+      loadApts();
+    } catch { Toast.error('Error', 'Could not cancel. Please try again.'); }
+  }
+
+  const MOCK_APTS = [
+    { id:1, datetime: new Date(Date.now()+86400000).toISOString(), doctorName:'Ramesh Sharma', specialisation:'Cardiologist', status:'confirmed', urgency:'Medium', preVisitSummary:'Patient reports chest tightness. Chief complaint: exertional dyspnea. Urgency: MEDIUM.' },
+    { id:2, datetime: new Date(Date.now()+3*86400000).toISOString(), doctorName:'Priya Menon', specialisation:'Dermatologist', status:'confirmed', urgency:'Low', preVisitSummary:'Skin rash on forearm. Urgency: LOW.' },
+    { id:3, datetime: new Date(Date.now()-7*86400000).toISOString(), doctorName:'Anil Kumar', specialisation:'Neurologist', status:'completed', urgency:'High', preVisitSummary:'Severe recurring headaches.', postVisitSummary:'Diagnosed with tension-type headache. Prescribed Amitriptyline 10mg at bedtime. Advised stress management, regular sleep schedule. Follow-up in 6 weeks.' },
+    { id:4, datetime: new Date(Date.now()-14*86400000).toISOString(), doctorName:'Vikram Bose', specialisation:'General Physician', status:'cancelled', urgency:'Low' },
+  ];
+
+  loadApts();
+</script>
+</body>
+</html>

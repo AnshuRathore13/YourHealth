@@ -1,0 +1,56 @@
+/* ============================================================
+   YourHealth.AI — Shared Sidebar Partial (JS-injected)
+   Include this script after design-system.css on every portal page
+   ============================================================ */
+
+/* ——————————————————————
+   Sidebar overlay (mobile)
+—————————————————————— */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 49;
+  backdrop-filter: blur(2px);
+}
+.sidebar-overlay.active { display: block; }
+
+/* Notification bell */
+.notif-bell {
+  position: relative;
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all var(--t-fast);
+}
+.notif-bell:hover { border-color: var(--accent); background: var(--accent-dim); }
+.notif-badge {
+  position: absolute; top: -3px; right: -3px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--red); font-size: 0.6rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--bg);
+  color: #fff;
+}
+
+/* Topbar search */
+.topbar-search {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-full);
+  padding: 8px 16px;
+  width: 260px;
+  transition: border-color var(--t-base);
+}
+.topbar-search:focus-within { border-color: var(--accent); }
+.topbar-search input {
+  background: none; border: none; color: var(--text);
+  font-size: 0.85rem; width: 100%;
+}
+.topbar-search input::placeholder { color: var(--text-3); }

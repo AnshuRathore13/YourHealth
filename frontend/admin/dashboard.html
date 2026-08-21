@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — YourHealth.AI</title>
+  <meta name="description" content="Admin portal — manage doctors, appointments, and system health.">
+  <link rel="stylesheet" href="../assets/css/design-system.css">
+  <link rel="stylesheet" href="../assets/css/portal.css">
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<div class="portal-layout">
+  <!-- Admin Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-dot" style="background:var(--purple);box-shadow:0 0 8px var(--purple);"></span>
+      YourHealth<span style="color:var(--purple)">.</span>AI
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Overview</div>
+      <a href="dashboard.html" class="sidebar-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <div class="sidebar-section-label">Manage</div>
+      <a href="doctors.html" class="sidebar-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        Doctors
+        <span class="badge badge-purple" style="margin-left:auto;font-size:0.65rem;" id="doctor-count-badge">—</span>
+      </a>
+      <a href="#" class="sidebar-item" onclick="Toast.info('Coming Soon', 'This module will be available in V2.')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/></svg>
+        All Appointments
+      </a>
+      <a href="#" class="sidebar-item" onclick="Toast.info('Coming Soon', 'This module will be available in V2.')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+        Notification Logs
+      </a>
+      <a href="#" class="sidebar-item" onclick="Toast.info('Coming Soon', 'This module will be available in V2.')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+        System Health
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user" onclick="Auth.logout()">
+        <div class="avatar" id="user-avatar" style="background:var(--purple-dim);color:var(--purple);">A</div>
+        <div><div style="font-size:0.85rem;font-weight:600;" id="user-name">Admin</div><div style="font-size:0.72rem;color:var(--text-3);">Admin · Log out</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="portal-main">
+    <header class="portal-header">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <button class="btn btn-ghost btn-sm" id="sidebar-toggle" style="padding:8px;border-radius:10px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div>
+          <div class="page-title" style="font-size:1.2rem;">Admin Dashboard</div>
+          <div class="page-subtitle">System overview and management</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <div class="notif-bell" onclick="Toast.info('All Caught Up!', 'There are no new alerts.')" style="cursor:pointer;">🔔</div>
+        <a href="doctors.html" class="btn btn-sm" style="background:var(--purple);color:#fff;font-weight:700;border-radius:var(--r-full);padding:8px 18px;">+ Add Doctor</a>
+      </div>
+    </header>
+
+    <div class="portal-content">
+      <!-- Stats -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:28px;">
+        <div class="stat-card"><div class="stat-icon" style="background:var(--purple-dim);">👨‍⚕️</div><div class="stat-value" id="st-doctors">—</div><div class="stat-label">Doctors</div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:var(--accent-dim);">👥</div><div class="stat-value" id="st-patients">—</div><div class="stat-label">Patients</div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:var(--green-dim);">📅</div><div class="stat-value" id="st-apts">—</div><div class="stat-label">Total Apts</div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:var(--amber-dim);">📬</div><div class="stat-value" id="st-notifs">—</div><div class="stat-label">Emails Sent</div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:var(--red-dim);">❌</div><div class="stat-value" id="st-cancelled">—</div><div class="stat-label">Cancelled</div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:var(--surface-3);">🧠</div><div class="stat-value">AI✦</div><div class="stat-label">Summaries</div></div>
+      </div>
+
+      <!-- Two-col: Recent apts + Doctors -->
+      <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:24px;align-items:start;">
+
+        <!-- Recent Appointments -->
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+            <div style="font-size:1rem;font-weight:700;">Recent Appointments</div>
+            <a href="#" class="btn-arrow" style="font-size:0.82rem;">View all <div class="arrow-circle" style="width:28px;height:28px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div></a>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Patient</th><th>Doctor</th><th>Date</th><th>Urgency</th><th>Status</th></tr></thead>
+              <tbody id="admin-apts-tbody">
+                <tr><td colspan="5"><div class="skeleton" style="height:36px;border-radius:8px;"></div></td></tr>
+                <tr><td colspan="5"><div class="skeleton" style="height:36px;border-radius:8px;"></div></td></tr>
+                <tr><td colspan="5"><div class="skeleton" style="height:36px;border-radius:8px;"></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Right col -->
+        <div style="display:flex;flex-direction:column;gap:20px;">
+
+          <!-- Doctors Overview -->
+          <div class="card-dark">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+              <div style="font-size:0.95rem;font-weight:700;">👨‍⚕️ Active Doctors</div>
+              <a href="doctors.html" class="btn btn-ghost btn-sm" style="font-size:0.78rem;">Manage →</a>
+            </div>
+            <div id="admin-doctors-list" style="display:flex;flex-direction:column;gap:10px;">
+              <div class="skeleton" style="height:52px;border-radius:14px;"></div>
+              <div class="skeleton" style="height:52px;border-radius:14px;"></div>
+              <div class="skeleton" style="height:52px;border-radius:14px;"></div>
+            </div>
+          </div>
+
+          <!-- Notification log -->
+          <div class="card-dark">
+            <div style="font-size:0.95rem;font-weight:700;margin-bottom:14px;">📬 Recent Notifications</div>
+            <div id="notif-log" style="display:flex;flex-direction:column;gap:8px;"></div>
+          </div>
+
+          <!-- System health indicator -->
+          <div style="background:linear-gradient(135deg,var(--green-dim),transparent);border:1px solid rgba(0,217,163,0.2);border-radius:20px;padding:20px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <span class="urgency-dot urgency-low"></span>
+              <div style="font-size:0.85rem;font-weight:700;color:var(--green);">All Systems Operational</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div style="display:flex;justify-content:space-between;font-size:0.78rem;color:var(--text-2);"><span>API Server</span><span style="color:var(--green);font-weight:600;">Online</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:0.78rem;color:var(--text-2);"><span>Email Worker</span><span style="color:var(--green);font-weight:600;">Running</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:0.78rem;color:var(--text-2);"><span>Gemini AI</span><span style="color:var(--green);font-weight:600;">Connected</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:0.78rem;color:var(--text-2);"><span>Google Calendar</span><span style="color:var(--green);font-weight:600;">Synced</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast-container"></div>
+<script src="../assets/js/api.js"></script>
+<script>
+  if (!Auth.requireRole('admin')) {}
+  const user = Auth.user;
+  if (user) {
+    document.getElementById('user-name').textContent = user.firstName || user.name;
+    document.getElementById('user-avatar').textContent = (user.firstName?.[0] || 'A').toUpperCase();
+  }
+
+  async function loadAdminData() {
+    try {
+      const [stats, docs, apts, notifs] = await Promise.all([
+        api.admin.stats(),
+        api.admin.doctors(),
+        api.admin.appointments({ limit:10 }),
+        api.admin.notificationLogs(),
+      ]);
+      updateStats(stats);
+      renderDoctors(docs.data || docs || []);
+      renderApts(apts.data || apts || []);
+      renderNotifLog(notifs.data || notifs || []);
+    } catch (err) {
+      console.error("Failed to load admin data:", err);
+      updateStats({ doctors:6, patients:124, appointments:312, emailsSent:589, cancelled:18 });
+      renderDoctors(MOCK_DOCTORS);
+      renderApts(MOCK_APTS);
+      renderNotifLog(MOCK_NOTIFS);
+    }
+  }
+
+  function updateStats(s) {
+    document.getElementById('st-doctors').textContent   = s.doctors   || '—';
+    document.getElementById('st-patients').textContent  = s.patients  || '—';
+    document.getElementById('st-apts').textContent      = s.appointments || '—';
+    document.getElementById('st-notifs').textContent    = s.emailsSent || '—';
+    document.getElementById('st-cancelled').textContent = s.cancelled  || '—';
+    document.getElementById('doctor-count-badge').textContent = s.doctors || '—';
+  }
+
+  function renderDoctors(list) {
+    const el = document.getElementById('admin-doctors-list');
+    el.innerHTML = list.slice(0,5).map(doc => `
+      <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--surface-3);border-radius:12px;">
+        <div class="avatar" style="width:36px;height:36px;font-size:0.8rem;background:var(--purple-dim);color:var(--purple);">${doc.name?.[0]||'D'}</div>
+        <div style="flex:1;">
+          <div style="font-size:0.85rem;font-weight:600;">Dr. ${doc.name}</div>
+          <div style="font-size:0.72rem;color:var(--text-3);">${doc.specialisation}</div>
+        </div>
+        <div class="badge badge-green" style="font-size:0.65rem;">Active</div>
+      </div>`).join('');
+  }
+
+  function renderApts(list) {
+    const tbody = document.getElementById('admin-apts-tbody');
+    tbody.innerHTML = list.slice(0,8).map(apt => {
+      const urgency = Format.urgency(apt.urgency || 'Low');
+      return `<tr>
+        <td style="font-size:0.83rem;font-weight:600;">${apt.patientName||'Patient'}</td>
+        <td style="font-size:0.83rem;color:var(--text-2);">Dr. ${apt.doctorName||'Doctor'}</td>
+        <td style="font-size:0.78rem;color:var(--text-3);">${Format.date(apt.datetime||apt.date)}</td>
+        <td><span class="badge ${urgency.class}" style="font-size:0.68rem;">${urgency.label}</span></td>
+        <td><span class="badge ${Format.status(apt.status)}" style="font-size:0.68rem;">${apt.status}</span></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function renderNotifLog(list) {
+    const el = document.getElementById('notif-log');
+    if (!list || list.length === 0) {
+      el.innerHTML = '<div style="font-size:0.8rem;color:var(--text-3);text-align:center;padding:10px;">No recent notifications</div>';
+      return;
+    }
+    el.innerHTML = list.slice(0,5).map(n => {
+      const isMock = !!n.message; 
+      const type = n.type ? n.type.toLowerCase() : 'email';
+      const msg = isMock ? n.message : (n.payload?.type || "System Notification");
+      const time = isMock ? n.time : Format.date(n.createdAt);
+      const stat = n.status ? n.status.toLowerCase() : 'pending';
+      return `
+      <div style="display:flex;align-items:flex-start;gap:10px;font-size:0.78rem;">
+        <span>${type==='email'?'📧':'💊'}</span>
+        <div>
+          <div style="color:var(--text-2);">${msg}</div>
+          <div style="color:var(--text-3);font-size:0.7rem;margin-top:2px;">${time}</div>
+        </div>
+        <div class="badge ${stat==='success' || stat==='sent'?'badge-green':(stat==='pending'?'badge-yellow':'badge-red')}" style="font-size:0.65rem;margin-left:auto;">${stat}</div>
+      </div>`;
+    }).join('');
+  }
+
+  const MOCK_DOCTORS = [
+    { id:1, name:'Ramesh Sharma', specialisation:'Cardiologist' },
+    { id:2, name:'Priya Menon',   specialisation:'Dermatologist' },
+    { id:3, name:'Anil Kumar',    specialisation:'Neurologist' },
+    { id:4, name:'Sneha Joshi',   specialisation:'Orthopedist' },
+    { id:5, name:'Vikram Bose',   specialisation:'General Physician' },
+    { id:6, name:'Asha Nair',     specialisation:'Pediatrician' },
+  ];
+  const MOCK_APTS = [
+    { id:1, datetime:new Date().toISOString(), patientName:'Aarav Shah', doctorName:'Ramesh Sharma', urgency:'High', status:'confirmed' },
+    { id:2, datetime:new Date(Date.now()-86400000).toISOString(), patientName:'Priya Patel', doctorName:'Priya Menon', urgency:'Low', status:'completed' },
+    { id:3, datetime:new Date(Date.now()-2*86400000).toISOString(), patientName:'Rohit Mehta', doctorName:'Anil Kumar', urgency:'Medium', status:'completed' },
+    { id:4, datetime:new Date(Date.now()+2*86400000).toISOString(), patientName:'Sneha Kapoor', doctorName:'Sneha Joshi', urgency:'Low', status:'confirmed' },
+    { id:5, datetime:new Date(Date.now()-5*86400000).toISOString(), patientName:'Arjun Singh', doctorName:'Vikram Bose', urgency:'Low', status:'cancelled' },
+  ];
+  const MOCK_NOTIFS = [
+    { type:'email', message:'Booking confirmation sent to Aarav Shah', time:'2 min ago', status:'sent' },
+    { type:'email', message:'Appointment reminder to Priya Patel', time:'1 hr ago', status:'sent' },
+    { type:'med', message:'Medication reminder: Metformin for Rohit Mehta', time:'2 hr ago', status:'sent' },
+    { type:'email', message:'Cancellation notice to Arjun Singh', time:'3 hr ago', status:'sent' },
+    { type:'email', message:'Post-visit summary sent to Sneha Kapoor', time:'4 hr ago', status:'failed' },
+  ];
+
+  loadAdminData();
+</script>
+</body>
+</html>

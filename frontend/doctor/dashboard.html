@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doctor Dashboard — YourHealth.AI</title>
+  <meta name="description" content="Doctor portal — view schedule, patient summaries, and manage appointments.">
+  <link rel="stylesheet" href="../assets/css/design-system.css">
+  <link rel="stylesheet" href="../assets/css/portal.css">
+  <style>
+    .patient-queue-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-xl);
+      padding: var(--space-5);
+      transition: all var(--t-base);
+      cursor: pointer;
+      position: relative;
+    }
+    .patient-queue-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(74,142,245,0.12);
+    }
+    .patient-queue-card .urgency-bar {
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      border-radius: var(--r-sm) 0 0 var(--r-sm);
+    }
+    .urgency-bar.low    { background: var(--green); }
+    .urgency-bar.medium { background: var(--amber); }
+    .urgency-bar.high   { background: var(--red); animation: pulse-dot 1.5s infinite; }
+
+    .notes-editor {
+      background: var(--surface-3);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: var(--space-5);
+    }
+
+    .leave-day {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.78rem; font-weight: 700; cursor: pointer;
+      background: var(--surface-3); border: 1px solid var(--border);
+      transition: all var(--t-fast); color: var(--text-2);
+    }
+    .leave-day:hover { border-color: var(--amber); color: var(--amber); }
+    .leave-day.marked { background: var(--amber-dim); border-color: var(--amber); color: var(--amber); }
+  </style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<div class="portal-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-dot" style="background:var(--green);box-shadow:0 0 8px var(--green);"></span>
+      YourHealth<span style="color:var(--green)">.</span>AI
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Doctor Menu</div>
+      <a href="dashboard.html" class="sidebar-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a href="schedule.html" class="sidebar-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/></svg>
+        My Schedule
+      </a>
+      <a href="#" class="sidebar-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        My Patients
+      </a>
+
+      <div class="sidebar-section-label">Manage</div>
+      <a href="schedule.html" class="sidebar-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+        Leave Management
+      </a>
+      <a href="#" class="sidebar-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/></svg>
+        Profile
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user" onclick="Auth.logout()">
+        <div class="avatar" id="user-avatar" style="background:var(--green-dim);color:var(--green);">D</div>
+        <div>
+          <div style="font-size:0.85rem;font-weight:600;" id="user-name">Doctor</div>
+          <div style="font-size:0.72rem;color:var(--text-3);">Doctor · Log out</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="portal-main">
+    <header class="portal-header">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <button class="btn btn-ghost btn-sm" id="sidebar-toggle" style="padding:8px;border-radius:10px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div>
+          <div class="page-title" id="greeting">Good morning, Doctor 👨‍⚕️</div>
+          <div class="page-subtitle" id="doc-date">Today's schedule</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="notif-bell">🔔<div class="notif-badge">2</div></div>
+        <a href="schedule.html" class="btn btn-sm" style="background:var(--green);color:#080810;font-weight:700;border-radius:var(--r-full);padding:8px 18px;">Manage Schedule</a>
+      </div>
+    </header>
+
+    <div class="portal-content">
+      <!-- Stats -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:28px;">
+        <div class="stat-card"><div class="stat-icon" style="background:var(--accent-dim);">📅</div><div class="stat-value" id="st-today">—</div><div class="stat-label">Today</div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:var(--red-dim);">⚡</div><div class="stat-value" id="st-high">—</div><div class="stat-label">High Urgency</div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:var(--green-dim);">✅</div><div class="stat-value" id="st-done">—</div><div class="stat-label">Done Today</div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:var(--amber-dim);">📋</div><div class="stat-value" id="st-pending">—</div><div class="stat-label">Pending Notes</div></div>
+      </div>
+
+      <!-- Main grid -->
+      <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:24px;align-items:start;" class="dash-grid">
+
+        <!-- Patient Queue -->
+        <div>
+          <div style="font-size:1rem;font-weight:700;margin-bottom:16px;">Today's Patient Queue</div>
+          <div id="patient-queue" style="display:flex;flex-direction:column;gap:12px;">
+            <div class="skeleton" style="height:100px;border-radius:20px;"></div>
+            <div class="skeleton" style="height:100px;border-radius:20px;"></div>
+            <div class="skeleton" style="height:100px;border-radius:20px;"></div>
+          </div>
+        </div>
+
+        <!-- Notes Editor + Leave Widget -->
+        <div style="display:flex;flex-direction:column;gap:20px;">
+          <!-- Quick Notes -->
+          <div class="card-dark">
+            <div style="font-size:0.95rem;font-weight:700;margin-bottom:14px;">📝 Submit Post-Visit Notes</div>
+            <div style="font-size:0.82rem;color:var(--text-3);margin-bottom:12px;" id="notes-patient-label">Select a patient from the queue →</div>
+            <div class="form-group" style="margin-bottom:12px;">
+              <label class="form-label">Clinical Notes</label>
+              <textarea class="form-input form-textarea" id="clinical-notes" placeholder="Diagnosis, findings, treatment plan..." style="min-height:100px;"></textarea>
+            </div>
+            <div class="form-group" style="margin-bottom:12px;">
+              <label class="form-label">Prescription</label>
+              <input class="form-input" type="text" id="prescription-input" placeholder="e.g. Metformin 500mg, twice daily for 30 days">
+            </div>
+            <button onclick="submitNotes()" class="btn btn-sm w-full" id="notes-btn" style="background:var(--green);color:#080810;font-weight:700;justify-content:center;" disabled>
+              ✓ Submit & Generate AI Summary
+            </button>
+          </div>
+
+          <!-- Leave Widget -->
+          <div class="card-dark">
+            <div style="font-size:0.95rem;font-weight:700;margin-bottom:4px;">🗓 Mark Leave Days</div>
+            <div style="font-size:0.78rem;color:var(--text-3);margin-bottom:14px;">Affected patients will be notified automatically</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;" id="leave-days-widget">
+              <!-- Next 14 days rendered by JS -->
+            </div>
+            <button onclick="saveLeave()" class="btn btn-outline btn-sm w-full" style="justify-content:center;">Save Leave Dates</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Post-Visit Result (appears after submission) -->
+      <div id="ai-postvisit-result" style="display:none;margin-top:24px;">
+        <div style="background:var(--green-dim);border:1px solid rgba(0,217,163,0.25);border-radius:20px;padding:24px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+            <span>🧠</span>
+            <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--green);">AI Post-Visit Summary — Sent to Patient</div>
+            <div class="badge badge-green" style="margin-left:auto;">✓ Generated</div>
+          </div>
+          <div style="font-size:0.88rem;color:var(--text);line-height:1.7;" id="ai-postvisit-text"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast-container"></div>
+<script src="../assets/js/api.js"></script>
+<script>
+  if (!Auth.requireRole('doctor')) {}
+
+  const user = Auth.user;
+  let selectedPatientApt = null;
+  let leaveDays = new Set();
+
+  if (user) {
+    document.getElementById('user-name').textContent = user.firstName || user.name;
+    document.getElementById('user-avatar').textContent = (user.firstName?.[0] || 'D').toUpperCase();
+    const hour = new Date().getHours();
+    const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+    document.getElementById('greeting').textContent = `${greet}, Dr. ${user.firstName || user.name} 👨‍⚕️`;
+    document.getElementById('doc-date').textContent = new Date().toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  }
+
+  async function loadSchedule() {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const res = await api.doctor.schedule(today);
+      const list = res.data || res || [];
+      renderQueue(list);
+      updateStats(list);
+    } catch {
+      renderQueue(MOCK_QUEUE);
+      updateStats(MOCK_QUEUE);
+    }
+  }
+
+  function updateStats(list) {
+    document.getElementById('st-today').textContent   = list.length;
+    document.getElementById('st-high').textContent    = list.filter(a => a.urgency === 'High').length;
+    document.getElementById('st-done').textContent    = list.filter(a => a.status === 'completed').length;
+    document.getElementById('st-pending').textContent = list.filter(a => a.status !== 'completed' && !a.postVisitSummary).length;
+  }
+
+  function renderQueue(list) {
+    const el = document.getElementById('patient-queue');
+    if (!list.length) {
+      el.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-3);background:var(--surface-2);border-radius:20px;">
+        <div style="font-size:2rem;margin-bottom:8px;">🎉</div>No appointments today!
+      </div>`;
+      return;
+    }
+    el.innerHTML = list.map(apt => {
+      const urgLevel = (apt.urgency || 'Low').toLowerCase();
+      const urgency = Format.urgency(apt.urgency || 'Low');
+      const d = new Date(apt.datetime || apt.date);
+      const h12 = ((d.getHours()%12)||12)+':'+String(d.getMinutes()).padStart(2,'0')+' '+(d.getHours()>=12?'PM':'AM');
+      return `
+        <div class="patient-queue-card" onclick="selectPatient(${JSON.stringify(apt).replace(/"/g,'&quot;')})">
+          <div class="urgency-bar ${urgLevel}"></div>
+          <div style="padding-left:10px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+              <div class="avatar" style="width:40px;height:40px;font-size:0.9rem;">${(apt.patientName||'P')[0]}</div>
+              <div style="flex:1;">
+                <div style="font-weight:700;font-size:0.92rem;">${apt.patientName||'Patient'}</div>
+                <div style="font-size:0.75rem;color:var(--text-3);">${h12} · ${apt.specialisation||'General'}</div>
+              </div>
+              <span class="badge ${urgency.class}"><span class="urgency-dot ${urgency.dot}"></span>${urgency.label}</span>
+            </div>
+            ${apt.preVisitSummary ? `
+              <div style="background:var(--surface-3);border-radius:10px;padding:10px;font-size:0.78rem;color:var(--text-2);line-height:1.5;">
+                <strong style="color:var(--accent);font-size:0.68rem;text-transform:uppercase;letter-spacing:0.07em;">AI Summary:</strong><br>
+                ${apt.preVisitSummary.slice(0,120)}...
+              </div>` : ''}
+            ${apt.status === 'completed' ? `<div class="badge badge-green" style="margin-top:8px;">✓ Notes submitted</div>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function selectPatient(apt) {
+    selectedPatientApt = apt;
+    document.getElementById('notes-patient-label').textContent = `Writing notes for: ${apt.patientName || 'Patient'}`;
+    document.getElementById('notes-btn').disabled = false;
+    document.getElementById('clinical-notes').focus();
+  }
+
+  async function submitNotes() {
+    if (!selectedPatientApt) { Toast.warning('Select Patient', 'Select a patient from the queue first.'); return; }
+    const notes = document.getElementById('clinical-notes').value;
+    const prescription = document.getElementById('prescription-input').value;
+    if (!notes.trim()) { Toast.warning('Add Notes', 'Please enter clinical notes.'); return; }
+
+    const btn = document.getElementById('notes-btn');
+    Loader.show(btn, 'Generating AI Summary...');
+    try {
+      const res = await api.doctor.submitNotes(selectedPatientApt.id, { notes, prescription });
+      document.getElementById('ai-postvisit-text').textContent = res.patientSummary || notes;
+      document.getElementById('ai-postvisit-result').style.display = 'block';
+      document.getElementById('ai-postvisit-result').scrollIntoView({ behavior:'smooth' });
+      Toast.success('Notes Submitted!', 'AI post-visit summary generated and sent to patient.');
+      document.getElementById('clinical-notes').value = '';
+      document.getElementById('prescription-input').value = '';
+      loadSchedule();
+    } catch {
+      // Demo fallback
+      const mockSummary = `Your visit summary: ${notes}. ${prescription ? `Prescription: ${prescription}.` : ''} Please follow the advised medication schedule and return for follow-up if symptoms persist. Stay hydrated and get adequate rest.`;
+      document.getElementById('ai-postvisit-text').textContent = mockSummary;
+      document.getElementById('ai-postvisit-result').style.display = 'block';
+      document.getElementById('ai-postvisit-result').scrollIntoView({ behavior:'smooth' });
+      Toast.success('Demo Mode', 'Summary generated. In production, this is sent via email.');
+    } finally {
+      Loader.hide(btn);
+    }
+  }
+
+  // Leave widget
+  function renderLeaveWidget() {
+    const el = document.getElementById('leave-days-widget');
+    const today = new Date(); today.setHours(0,0,0,0);
+    let html = '';
+    for (let i = 0; i < 14; i++) {
+      const d = new Date(today); d.setDate(today.getDate() + i);
+      const key = d.toISOString().split('T')[0];
+      const isMarked = leaveDays.has(key);
+      html += `<div class="leave-day ${isMarked?'marked':''}" onclick="toggleLeave('${key}',this)" title="${key}">${d.getDate()}<br><span style="font-size:0.55rem;font-weight:500;">${d.toLocaleDateString('en-IN',{month:'short'})}</span></div>`;
+    }
+    el.innerHTML = html;
+  }
+
+  function toggleLeave(key, el) {
+    if (leaveDays.has(key)) { leaveDays.delete(key); el.classList.remove('marked'); }
+    else { leaveDays.add(key); el.classList.add('marked'); }
+  }
+
+  async function saveLeave() {
+    if (!leaveDays.size) { Toast.info('No dates', 'Select dates to mark as leave.'); return; }
+    try {
+      const docId = user?.id || 1;
+      await api.doctors.setLeave(docId, Array.from(leaveDays));
+      Toast.success('Leave Saved', `${leaveDays.size} leave day(s) saved. Affected patients notified.`);
+    } catch {
+      Toast.success('Demo', `${leaveDays.size} leave day(s) would be saved in production.`);
+    }
+  }
+
+  const MOCK_QUEUE = [
+    { id:1, datetime:new Date().toISOString(), patientName:'Aarav Shah', specialisation:'Cardiology', urgency:'High', preVisitSummary:'Patient reports severe chest tightness and radiating pain to the left arm for 2 days. Chief complaint: potential cardiac event. Urgency: HIGH.' },
+    { id:2, datetime:new Date(Date.now()+1800000).toISOString(), patientName:'Priya Patel', specialisation:'Cardiology', urgency:'Medium', preVisitSummary:'Patient reports breathlessness on exertion and mild ankle swelling for 1 week. Urgency: MEDIUM.' },
+    { id:3, datetime:new Date(Date.now()+3600000).toISOString(), patientName:'Rohit Mehta', specialisation:'Cardiology', urgency:'Low', preVisitSummary:'Routine follow-up. BP monitoring, medication review. Urgency: LOW.', status:'completed' },
+  ];
+
+  loadSchedule();
+  renderLeaveWidget();
+</script>
+</body>
+</html>
