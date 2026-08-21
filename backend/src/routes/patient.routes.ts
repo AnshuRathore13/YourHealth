@@ -11,7 +11,13 @@ router.get("/appointments", authenticate, requireRole(["PATIENT"]), async (req: 
   try {
     const { status } = req.query;
     const where: any = { patientId: req.user!.id };
-    if (status) where.status = (status as string).toUpperCase();
+    if (status) {
+      if ((status as string).toLowerCase() === "upcoming") {
+        where.status = { in: ["PENDING", "CONFIRMED"] };
+      } else {
+        where.status = (status as string).toUpperCase();
+      }
+    }
 
     const apts = await prisma.appointment.findMany({
       where,

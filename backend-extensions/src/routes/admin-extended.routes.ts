@@ -81,6 +81,7 @@ router.post("/doctors", authenticate, requireRole(["ADMIN"]), async (req: AuthRe
             slotDuration:   slotDuration || 30,
             workingHours:   { start: workStart || "09:00", end: workEnd || "17:00" },
             leaveDays:      [],
+            rating:         parseFloat((Math.random() * (5.0 - 4.0) + 4.0).toFixed(1)),
           }
         }
       },
