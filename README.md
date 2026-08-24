@@ -4,7 +4,7 @@ A comprehensive healthcare appointment platform with dedicated portals for Patie
 
 ---
 
-## 🚀 Setup Guide
+##  Setup Guide
 
 ### 1. Prerequisites
 - Node.js (v18+)
@@ -47,7 +47,7 @@ The frontend is built with vanilla HTML/CSS/JS and runs statically.
 
 ---
 
-## 📅 Google Calendar Setup Steps
+##  Google Calendar Setup Steps
 
 To enable automated calendar event creation for bookings:
 1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
@@ -73,7 +73,7 @@ The platform uses Google's Gemini-3.6-Flash model for medical text processing.
 
 ---
 
-## 💾 Database Schema Overview
+##  Database Schema Overview
 
 The database uses PostgreSQL via Prisma ORM.
 
@@ -84,7 +84,7 @@ The database uses PostgreSQL via Prisma ORM.
 
 ---
 
-## 🌐 API Documentation
+##  API Documentation
 
 ### Authentication
 - `POST /api/auth/register` - Create patient account
