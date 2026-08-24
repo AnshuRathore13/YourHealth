@@ -25,17 +25,7 @@ const PORT = process.env.PORT || 5000;
 // ——————————————————————————————
 // CORS — allow frontend (local file and dev server)
 // ——————————————————————————————
-app.use((0, cors_1.default)({
-    origin: [
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "http://127.0.0.1:5500", // VS Code Live Server
-        "http://localhost:8080",
-        "null", // file:// origin in some browsers
-        /^https:\/\/yourhealth.*\.vercel\.app$/,
-    ],
-    credentials: true,
-}));
+app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 // ——————————————————————————————
 // Health check
