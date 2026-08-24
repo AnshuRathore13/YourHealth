@@ -3,11 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Patient Dashboard — YourHealth.AI</title>
+  <title>Patient Dashboard — YourHealth</title>
   <meta name="description" content="Your personal health dashboard — appointments, AI summaries, and medication reminders.">
   <link rel="stylesheet" href="../assets/css/design-system.css">
   <link rel="stylesheet" href="../assets/css/portal.css">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
+    .md-content { font-size:0.85rem; color:var(--text); line-height:1.6; }
+    .md-content h1, .md-content h2, .md-content h3 { color:var(--green); margin-top:12px; margin-bottom:8px; font-size:1rem; }
+    .md-content p { margin-bottom: 8px; }
+    .md-content ul { padding-left: 20px; margin-bottom: 8px; }
+    .md-content li { margin-bottom: 4px; }
+    .md-content strong { font-weight: 700; color:var(--text); }
     .apt-card {
       background: var(--surface-2);
       border: 1px solid var(--border);
@@ -56,7 +63,7 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
       <span class="logo-dot"></span>
-      YourHealth<span style="color:var(--accent)">.</span>AI
+      YourHealth
     </div>
 
     <nav class="sidebar-nav">
@@ -230,7 +237,7 @@
           <div style="background:linear-gradient(135deg,var(--green-dim),transparent);border:1px solid rgba(0,217,163,0.2);border-radius:20px;padding:20px;">
             <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--green);margin-bottom:8px;">✦ Health Reminder</div>
             <div style="font-size:0.88rem;color:var(--text);font-weight:600;margin-bottom:4px;">Stay hydrated today</div>
-            <div style="font-size:0.8rem;color:var(--text-2);">Drink at least 8 glasses of water. Your next appointment is tomorrow.</div>
+            <div style="font-size:0.8rem;color:var(--text-2);">Drink at least 8 glasses of water to maintain optimal health.</div>
           </div>
         </div>
       </div>
@@ -238,6 +245,19 @@
     </div><!-- /portal-content -->
   </main>
 </div><!-- /portal-layout -->
+
+<!-- Summary Modal -->
+<div class="modal-overlay" id="summary-modal">
+  <div class="modal" style="max-width:640px;">
+    <div class="modal-header">
+      <div class="modal-title">📋 Post-Visit Summary</div>
+      <div class="modal-close" onclick="closeSummaryModal()">✕</div>
+    </div>
+    <div id="summary-modal-body" style="max-height: 60vh; overflow-y: auto; padding-right: 12px; margin-bottom: 24px;" class="md-content">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+</div>
 
 <div class="toast-container"></div>
 <script src="../assets/js/api.js"></script>
@@ -283,13 +303,12 @@
 
     } catch (err) {
       console.error('Dashboard load failed:', err);
-      // Show mock data for demo
-      renderAppointments(MOCK_APPOINTMENTS);
-      renderMeds(MOCK_MEDS);
-      renderSummaries(MOCK_SUMMARIES);
-      document.getElementById('stat-upcoming').textContent  = '2';
-      document.getElementById('stat-completed').textContent = '5';
-      document.getElementById('stat-meds').textContent = '3';
+      renderAppointments([]);
+      renderMeds([]);
+      renderSummaries([]);
+      document.getElementById('stat-upcoming').textContent  = '0';
+      document.getElementById('stat-completed').textContent = '0';
+      document.getElementById('stat-meds').textContent = '0';
     }
   }
 
@@ -349,7 +368,7 @@
         <div class="med-icon">💊</div>
         <div style="flex:1;">
           <div style="font-size:0.88rem;font-weight:700;">${m.name || m.medication}</div>
-          <div style="font-size:0.75rem;color:var(--text-3);">${m.dosage || ''} · ${m.frequency || 'Daily'}</div>
+          <div style="font-size:0.75rem;color:var(--text-3);">${m.dosage || ''} · ${m.frequency || 'Daily'} ${m.doctorName ? `· Dr. ${m.doctorName}` : ''}</div>
         </div>
         <div class="badge badge-green" style="font-size:0.7rem;">Take today</div>
       </div>`).join('');
@@ -361,15 +380,34 @@
       el.innerHTML = `<div style="font-size:0.82rem;color:var(--text-3);text-align:center;padding:12px;">No completed visit summaries yet</div>`;
       return;
     }
-    el.innerHTML = list.slice(0,3).map(apt => `
-      <div style="border:1px solid var(--border);border-radius:14px;padding:14px;transition:all var(--t-fast);" onmouseover="this.style.borderColor='var(--border-hover)'" onmouseout="this.style.borderColor='var(--border)'">
+    el.innerHTML = list.slice(0,3).map(apt => {
+      const summaryHTML = marked.parse(apt.postVisitSummary || '');
+      const rawText = (apt.postVisitSummary || '').replace(/[\*#_\[\]>`]/g, '');
+      
+      return `
+      <div style="border:1px solid var(--border);border-radius:14px;padding:14px;transition:all var(--t-fast);cursor:pointer;" onmouseover="this.style.borderColor='var(--border-hover)'" onmouseout="this.style.borderColor='var(--border)'" onclick="openSummaryModal(${JSON.stringify(summaryHTML).replace(/"/g,'&quot;')})">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
           <div style="font-size:0.85rem;font-weight:600;">Dr. ${apt.doctorName || 'Doctor'}</div>
           <div style="font-size:0.72rem;color:var(--text-3);">${Format.date(apt.datetime || apt.date)}</div>
         </div>
-        <div style="font-size:0.78rem;color:var(--text-2);line-height:1.5;">${(apt.postVisitSummary || '').slice(0,100)}...</div>
-      </div>`).join('');
+        <div style="font-size:0.78rem;color:var(--text-2);line-height:1.5;">${rawText.slice(0,100)}...</div>
+      </div>`;
+    }).join('');
   }
+
+  function openSummaryModal(html) {
+    document.getElementById('summary-modal-body').innerHTML = html;
+    document.getElementById('summary-modal').classList.add('open');
+  }
+
+  function closeSummaryModal() {
+    document.getElementById('summary-modal').classList.remove('open');
+  }
+
+  // Hide modal when clicking outside
+  document.getElementById('summary-modal').addEventListener('click', (e) => {
+    if (e.target.id === 'summary-modal') closeSummaryModal();
+  });
 
   // Mock data for demo when backend is offline
   const MOCK_APPOINTMENTS = [

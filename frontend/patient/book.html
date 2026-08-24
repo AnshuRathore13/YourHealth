@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Book Appointment — YourHealth.AI</title>
+  <title>Book Appointment — YourHealth</title>
   <meta name="description" content="Search doctors and book an appointment with AI symptom analysis.">
   <link rel="stylesheet" href="../assets/css/design-system.css">
   <link rel="stylesheet" href="../assets/css/portal.css">
@@ -104,7 +104,7 @@
 <div class="portal-layout">
   <!-- Sidebar (same structure) -->
   <aside class="sidebar" id="sidebar">
-    <div class="sidebar-logo"><span class="logo-dot"></span>YourHealth<span style="color:var(--accent)">.</span>AI</div>
+    <div class="sidebar-logo"><span class="logo-dot"></span>YourHealth</div>
     <nav class="sidebar-nav">
       <div class="sidebar-section-label">Patient Menu</div>
       <a href="dashboard.html" class="sidebar-item">
@@ -392,7 +392,9 @@
           <div style="flex:1;">
             <div style="font-weight:700;font-size:0.95rem;">Dr. ${doc.name}</div>
             <div style="font-size:0.78rem;color:var(--text-2);">${doc.specialisation}</div>
-            <div class="rating-stars">${'★'.repeat(Math.round(doc.rating||4))}${'☆'.repeat(5-Math.round(doc.rating||4))} <span style="color:var(--text-3);font-size:0.72rem;">${doc.rating||4.0}</span></div>
+            <div class="rating-stars" style="margin-top:4px;font-size:0.85rem;color:var(--green);font-weight:600;">
+              ⭐ ${(doc.rating || 0).toFixed(1)} <span style="color:var(--text-3);font-weight:400;font-size:0.75rem;">(${doc.numRatings || 0} reviews)</span>
+            </div>
           </div>
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:6px;">

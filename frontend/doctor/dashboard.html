@@ -3,11 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Doctor Dashboard — YourHealth.AI</title>
+  <title>Doctor Dashboard — YourHealth</title>
   <meta name="description" content="Doctor portal — view schedule, patient summaries, and manage appointments.">
   <link rel="stylesheet" href="../assets/css/design-system.css">
   <link rel="stylesheet" href="../assets/css/portal.css">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
+    .md-content { font-size:0.85rem; color:var(--text); line-height:1.6; }
+    .md-content h1, .md-content h2, .md-content h3 { color:var(--green); margin-top:12px; margin-bottom:8px; font-size:1rem; }
+    .md-content p { margin-bottom: 8px; }
+    .md-content ul { padding-left: 20px; margin-bottom: 8px; }
+    .md-content li { margin-bottom: 4px; }
+    .md-content strong { font-weight: 700; color:var(--text); }
     .patient-queue-card {
       background: var(--surface-2);
       border: 1px solid var(--border);
@@ -58,7 +65,7 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
       <span class="logo-dot" style="background:var(--green);box-shadow:0 0 8px var(--green);"></span>
-      YourHealth<span style="color:var(--green)">.</span>AI
+      YourHealth
     </div>
     <nav class="sidebar-nav">
       <div class="sidebar-section-label">Doctor Menu</div>
@@ -70,7 +77,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/></svg>
         My Schedule
       </a>
-      <a href="#" class="sidebar-item" onclick="Toast.info('Coming Soon', 'This module will be available in V2.')">
+      <a href="patients.html" class="sidebar-item">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
         My Patients
       </a>
@@ -141,6 +148,19 @@
 
         <!-- Notes Editor + Leave Widget -->
         <div style="display:flex;flex-direction:column;gap:20px;">
+          <!-- Pre-Visit Context (Shows when patient selected) -->
+          <div class="card-dark" id="pre-visit-context" style="display:none;">
+            <div style="font-size:0.95rem;font-weight:700;margin-bottom:14px;color:var(--accent);">🧠 Pre-Visit Context</div>
+            <div id="patient-symptoms-section" style="margin-bottom:16px;">
+              <div style="font-size:0.75rem;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Reported Symptoms</div>
+              <div id="patient-symptoms-text" style="font-size:0.88rem;color:var(--text-2);line-height:1.5;"></div>
+            </div>
+            <div>
+              <div style="font-size:0.75rem;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">AI Summary</div>
+              <div id="ai-previsit-text" class="md-content"></div>
+            </div>
+          </div>
+
           <!-- Quick Notes -->
           <div class="card-dark">
             <div style="font-size:0.95rem;font-weight:700;margin-bottom:14px;">📝 Submit Post-Visit Notes</div>
@@ -211,8 +231,8 @@
       renderQueue(list);
       updateStats(list);
     } catch {
-      renderQueue(MOCK_QUEUE);
-      updateStats(MOCK_QUEUE);
+      renderQueue([]);
+      updateStats([]);
     }
   }
 
@@ -264,6 +284,19 @@
     document.getElementById('notes-patient-label').textContent = `Writing notes for: ${apt.patientName || 'Patient'}`;
     document.getElementById('notes-btn').disabled = false;
     document.getElementById('clinical-notes').focus();
+
+    // Show Pre-Visit Context
+    const ctx = document.getElementById('pre-visit-context');
+    const symText = document.getElementById('patient-symptoms-text');
+    const aiText = document.getElementById('ai-previsit-text');
+    
+    if (apt.symptoms || apt.preVisitSummary) {
+      ctx.style.display = 'block';
+      symText.textContent = apt.symptoms || 'No symptoms reported.';
+      aiText.innerHTML = apt.preVisitSummary ? marked.parse(apt.preVisitSummary) : '<span style="color:var(--text-3);">No AI summary available.</span>';
+    } else {
+      ctx.style.display = 'none';
+    }
   }
 
   async function submitNotes() {

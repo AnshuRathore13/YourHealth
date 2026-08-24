@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Log In — YourHealth.AI</title>
-  <meta name="description" content="Sign in to your YourHealth.AI portal — Patient, Doctor, or Admin.">
+  <title>Log In — YourHealth</title>
+  <meta name="description" content="Sign in to your YourHealth portal — Patient, Doctor, or Admin.">
   <link rel="stylesheet" href="../assets/css/design-system.css">
   <style>
     body { min-height: 100vh; display: flex; align-items: stretch; }
@@ -66,9 +66,6 @@
       color: #fff;
       box-shadow: 0 2px 12px var(--accent-glow);
     }
-
-    .role-tab[data-role="doctor"].active  { background: var(--green);  color: #080810; }
-    .role-tab[data-role="admin"].active   { background: var(--purple); color: #fff; }
 
     .auth-title {
       font-size: 1.8rem;
@@ -168,7 +165,7 @@
 
   <div class="auth-logo" style="position:relative;z-index:2;">
     <span class="logo-dot"></span>
-    YourHealth<span style="color:var(--accent)">.</span>AI
+    YourHealth
   </div>
 
   <div style="position:relative;z-index:2;margin-bottom:40px;">
@@ -186,14 +183,14 @@
       </div>
     </div>
     <div class="auth-feature">
-      <div class="auth-feature-icon" style="background:var(--green-dim);">📅</div>
+      <div class="auth-feature-icon" style="background:var(--accent-dim);">📅</div>
       <div>
         <div class="auth-feature-title">Google Calendar Sync</div>
         <div class="auth-feature-desc">All appointments automatically appear in your calendar — no manual entry.</div>
       </div>
     </div>
     <div class="auth-feature">
-      <div class="auth-feature-icon" style="background:var(--purple-dim);">💊</div>
+      <div class="auth-feature-icon" style="background:var(--accent-dim);">💊</div>
       <div>
         <div class="auth-feature-title">Medication Reminders</div>
         <div class="auth-feature-desc">Smart email reminders based on your prescription frequency.</div>
@@ -206,7 +203,7 @@
 <div class="auth-right">
   <div class="auth-logo" style="display:none" id="mobile-logo">
     <span class="logo-dot"></span>
-    YourHealth<span style="color:var(--accent)">.</span>AI
+    YourHealth
   </div>
 
   <!-- Role selector -->

@@ -104,7 +104,8 @@ model DoctorProfile {
   consultationFee Int      @default(500)
   experience      Int      @default(0)
   bio             String?
-  rating          Float    @default(4.5)
+  rating          Float    @default(0)
+  numRatings      Int      @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -128,6 +129,7 @@ model Appointment {
   urgencyLevel     String?
   postVisitNotes   String?
   postVisitSummary String?
+  rating           Float?
 
   // External integration
   calendarEventId String?

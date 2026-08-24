@@ -55,6 +55,38 @@ router.get("/profile", authenticate, requireRole(["DOCTOR"]), async (req: AuthRe
 });
 
 // ——————————————————————————————————————
+// PATCH /api/doctor/profile
+// ——————————————————————————————————————
+router.patch("/profile", authenticate, requireRole(["DOCTOR"]), async (req: AuthRequest, res): Promise<void> => {
+  try {
+    const { workingHours, slotDuration } = req.body;
+    
+    // Find the doctor's profile ID first
+    const docProfile = await prisma.doctorProfile.findUnique({
+      where: { userId: req.user!.id }
+    });
+
+    if (!docProfile) {
+      res.status(404).json({ error: "Doctor profile not found" });
+      return;
+    }
+
+    const updated = await prisma.doctorProfile.update({
+      where: { id: docProfile.id },
+      data: {
+        workingHours: workingHours || docProfile.workingHours,
+        slotDuration: slotDuration || docProfile.slotDuration,
+      }
+    });
+
+    res.json({ message: "Profile updated successfully", data: updated });
+  } catch (error) {
+    console.error("PATCH /doctor/profile error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ——————————————————————————————————————
 // GET /api/doctor/patients  — list unique patients seen
 // ——————————————————————————————————————
 router.get("/patients", authenticate, requireRole(["DOCTOR"]), async (req: AuthRequest, res): Promise<void> => {
@@ -91,7 +123,7 @@ router.post("/appointments/:id/notes", authenticate, requireRole(["DOCTOR"]), as
       where: { id: appointmentId },
       data: {
         status:           "COMPLETED",
-        postVisitNotes:   notes,
+        postVisitNotes:   fullNotes,
         postVisitSummary: patientSummary,
       }
     });
@@ -100,11 +132,20 @@ router.post("/appointments/:id/notes", authenticate, requireRole(["DOCTOR"]), as
       { type: "EMAIL", payload: { appointmentId, type: "POST_VISIT_SUMMARY" } }
     ];
 
-    if (prescriptionFrequencyDays && typeof prescriptionFrequencyDays === "number") {
-      notifications.push({
-        type: "EMAIL",
-        payload: { appointmentId, type: "MEDICATION_REMINDER", days: prescriptionFrequencyDays }
-      });
+    try {
+      const parsedSummary = JSON.parse(patientSummary);
+      if (parsedSummary.medication && parsedSummary.medication.durationDays) {
+        notifications.push({
+          type: "EMAIL",
+          payload: { 
+            appointmentId, 
+            type: "MEDICATION_REMINDER", 
+            days: parsedSummary.medication.durationDays 
+          }
+        });
+      }
+    } catch(e) {
+      // Ignore parse errors, just means no reminder
     }
 
     await prisma.notificationQueue.createMany({ data: notifications });
@@ -146,7 +187,7 @@ router.get("/prescriptions", authenticate, requireRole(["DOCTOR"]), async (req: 
 });
 
 function extractMedName(notes: string): string {
-  const match = notes.match(/(?:prescribed|take|medication)[\s:]+([A-Z][a-z]+ \d+mg)/i);
+  const match = notes.match(/(?:prescription|prescribed|take|medication)[\s:]+([a-z\s\-]+ \d+mg)/i);
   return match ? match[1] : "Prescribed medication";
 }
 function extractDosage(notes: string): string {

@@ -25,7 +25,7 @@ export const startWorkers = () => {
               if (user) {
                 await sendEmail(
                   user.email,
-                  "Welcome to YourHealth.AI",
+                  "Welcome to YourHealth",
                   `Hi Dr. ${user.name},\n\nYour account has been created.\nEmail: ${user.email}\nTemporary Password: ${payload.tempPassword}`
                 );
               }
@@ -33,7 +33,7 @@ export const startWorkers = () => {
               const resetLink = `http://localhost:3000/auth/login.html?reset_token=${payload.token}`;
               await sendEmail(
                 payload.email,
-                "Password Reset Request - YourHealth.AI",
+                "Password Reset Request - YourHealth",
                 `Hi ${payload.name},\n\nYou requested a password reset. Please click the link below to set a new password:\n\n${resetLink}\n\nIf you did not request this, please ignore this email.\nThis link will expire in 1 hour.`
               );
             } else {

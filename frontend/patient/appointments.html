@@ -3,15 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Appointments — YourHealth.AI</title>
+  <title>My Appointments — YourHealth</title>
   <link rel="stylesheet" href="../assets/css/design-system.css">
   <link rel="stylesheet" href="../assets/css/portal.css">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    .md-content { font-size:0.85rem; color:var(--text); line-height:1.6; }
+    .md-content h1, .md-content h2, .md-content h3 { color:var(--green); margin-top:12px; margin-bottom:8px; font-size:1rem; }
+    .md-content p { margin-bottom: 8px; }
+    .md-content ul { padding-left: 20px; margin-bottom: 8px; }
+    .md-content li { margin-bottom: 4px; }
+    .md-content strong { font-weight: 700; color:var(--text); }
+  </style>
 </head>
 <body>
 <div class="sidebar-overlay" id="sidebar-overlay"></div>
 <div class="portal-layout">
   <aside class="sidebar" id="sidebar">
-    <div class="sidebar-logo"><span class="logo-dot"></span>YourHealth<span style="color:var(--accent)">.</span>AI</div>
+    <div class="sidebar-logo"><span class="logo-dot"></span>YourHealth</div>
     <nav class="sidebar-nav">
       <a href="dashboard.html" class="sidebar-item">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
@@ -48,14 +57,29 @@
         <div class="filter-pill" onclick="filterApts('cancelled',this)">❌ Cancelled</div>
       </div>
 
-      <!-- Appointment detail modal -->
       <div class="modal-overlay" id="apt-modal">
         <div class="modal" style="max-width:640px;">
           <div class="modal-header">
             <div class="modal-title" id="modal-title">Appointment Details</div>
             <div class="modal-close" onclick="closeModal()">✕</div>
           </div>
-          <div id="modal-body"><!-- Populated by JS --></div>
+          <div id="modal-body" style="max-height: 60vh; overflow-y: auto; padding-right: 12px;"><!-- Populated by JS --></div>
+        </div>
+      </div>
+
+      <div class="modal-overlay" id="rate-modal">
+        <div class="modal" style="max-width:400px;text-align:center;">
+          <div class="modal-header">
+            <div class="modal-title">Rate Doctor</div>
+            <div class="modal-close" onclick="closeRateModal()">✕</div>
+          </div>
+          <div style="padding:20px 0;">
+            <div style="font-size:0.95rem;color:var(--text-2);margin-bottom:16px;">How was your experience?</div>
+            <div id="star-selector" style="font-size:2rem;cursor:pointer;display:flex;justify-content:center;gap:8px;">
+              <span data-val="1">☆</span><span data-val="2">☆</span><span data-val="3">☆</span><span data-val="4">☆</span><span data-val="5">☆</span>
+            </div>
+            <button id="submit-rate-btn" class="btn btn-primary" style="margin-top:24px;width:100%;justify-content:center;display:none;">Submit Rating</button>
+          </div>
         </div>
       </div>
 
@@ -141,6 +165,7 @@
           <div style="display:flex;gap:6px;">
             <button onclick="viewApt(${JSON.stringify(apt).replace(/"/g,'&quot;')})" class="btn btn-ghost btn-sm" style="padding:6px 10px;font-size:0.78rem;">View</button>
             ${apt.status === 'confirmed' ? `<button onclick="cancelApt('${apt.id}')" class="btn btn-danger btn-sm" style="padding:6px 10px;font-size:0.78rem;">Cancel</button>` : ''}
+            ${apt.status === 'completed' ? (apt.rating == null ? `<button onclick="openRateModal('${apt.id}')" class="btn btn-outline btn-sm" style="padding:6px 10px;font-size:0.78rem;">Rate ⭐</button>` : `<span style="font-size:0.75rem;font-weight:700;color:var(--green);padding-top:6px;">Rated: ${apt.rating}⭐</span>`) : ''}
           </div>
         </td>
       </tr>`;
@@ -163,12 +188,12 @@
         ${apt.preVisitSummary ? `
           <div style="background:var(--accent-dim);border:1px solid rgba(74,142,245,0.2);border-radius:14px;padding:14px;">
             <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--accent);margin-bottom:8px;">🧠 AI Pre-Visit Summary</div>
-            <div style="font-size:0.85rem;color:var(--text);line-height:1.6;">${apt.preVisitSummary}</div>
+            <div class="md-content">${marked.parse(apt.preVisitSummary)}</div>
           </div>` : ''}
         ${apt.postVisitSummary ? `
           <div style="background:var(--green-dim);border:1px solid rgba(0,217,163,0.2);border-radius:14px;padding:14px;">
             <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--green);margin-bottom:8px;">📋 Post-Visit Summary</div>
-            <div style="font-size:0.85rem;color:var(--text);line-height:1.6;">${apt.postVisitSummary}</div>
+            <div class="md-content">${marked.parse(apt.postVisitSummary)}</div>
           </div>` : ''}
       </div>`;
     document.getElementById('apt-modal').classList.add('open');
@@ -176,6 +201,60 @@
 
   function closeModal() { document.getElementById('apt-modal').classList.remove('open'); }
   document.getElementById('apt-modal').addEventListener('click', (e) => { if (e.target.id === 'apt-modal') closeModal(); });
+  
+  // Rate Modal Logic
+  let currentRateAptId = null;
+  let currentRatingVal = 0;
+  function openRateModal(aptId) {
+    currentRateAptId = aptId;
+    currentRatingVal = 0;
+    document.getElementById('submit-rate-btn').style.display = 'none';
+    const stars = document.querySelectorAll('#star-selector span');
+    stars.forEach(s => { s.textContent = '☆'; s.style.color = 'var(--text-3)'; });
+    document.getElementById('rate-modal').classList.add('open');
+  }
+  function closeRateModal() { document.getElementById('rate-modal').classList.remove('open'); }
+  document.getElementById('rate-modal').addEventListener('click', (e) => { if (e.target.id === 'rate-modal') closeRateModal(); });
+  
+  document.querySelectorAll('#star-selector span').forEach(star => {
+    star.addEventListener('mouseover', function() {
+      const val = parseInt(this.getAttribute('data-val'));
+      document.querySelectorAll('#star-selector span').forEach((s, idx) => {
+        s.textContent = idx < val ? '★' : '☆';
+        s.style.color = idx < val ? 'var(--green)' : 'var(--text-3)';
+      });
+    });
+    star.addEventListener('mouseout', function() {
+      document.querySelectorAll('#star-selector span').forEach((s, idx) => {
+        s.textContent = idx < currentRatingVal ? '★' : '☆';
+        s.style.color = idx < currentRatingVal ? 'var(--green)' : 'var(--text-3)';
+      });
+    });
+    star.addEventListener('click', function() {
+      currentRatingVal = parseInt(this.getAttribute('data-val'));
+      document.getElementById('submit-rate-btn').style.display = 'flex';
+      document.querySelectorAll('#star-selector span').forEach((s, idx) => {
+        s.textContent = idx < currentRatingVal ? '★' : '☆';
+        s.style.color = idx < currentRatingVal ? 'var(--green)' : 'var(--text-3)';
+      });
+    });
+  });
+
+  document.getElementById('submit-rate-btn').addEventListener('click', async () => {
+    if (!currentRateAptId || currentRatingVal === 0) return;
+    const btn = document.getElementById('submit-rate-btn');
+    Loader.show(btn, 'Submitting...');
+    try {
+      await api.appointments.rate(currentRateAptId, currentRatingVal);
+      Toast.success('Submitted', 'Thank you for rating!');
+      closeRateModal();
+      loadApts();
+    } catch (e) {
+      Toast.error('Error', 'Failed to submit rating.');
+    } finally {
+      Loader.hide(btn);
+    }
+  });
 
   async function cancelApt(id) {
     if (!confirm('Are you sure you want to cancel this appointment?')) return;

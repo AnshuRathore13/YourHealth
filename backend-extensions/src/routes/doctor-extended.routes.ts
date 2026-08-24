@@ -90,7 +90,7 @@ router.post("/appointments/:id/notes", authenticate, requireRole(["DOCTOR"]), as
       where: { id: appointmentId },
       data: {
         status:           "COMPLETED",
-        postVisitNotes:   notes,
+        postVisitNotes:   fullNotes,
         postVisitSummary: patientSummary,
       }
     });
@@ -130,7 +130,7 @@ router.get("/prescriptions", authenticate, requireRole(["DOCTOR"]), async (req: 
       .filter(a => a.postVisitNotes)
       .map(a => {
         const notes = a.postVisitNotes || "";
-        const matchName = notes.match(/(?:prescribed|take|medication)[\s:]+([A-Z][a-z]+ \d+mg)/i);
+        const matchName = notes.match(/(?:prescription|prescribed|take|medication)[\s:]+([a-z\s\-]+ \d+mg)/i);
         const matchDosage = notes.match(/(\d+mg)/i);
         
         let freq = "Daily";

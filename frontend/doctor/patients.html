@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Patients — YourHealth</title>
+  <meta name="description" content="View your patients and their visit history.">
+  <link rel="stylesheet" href="../assets/css/design-system.css">
+  <link rel="stylesheet" href="../assets/css/portal.css">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    .patient-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-xl);
+      padding: 24px;
+      transition: all var(--t-base);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .patient-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(74,142,245,0.12);
+    }
+    .patient-avatar {
+      width: 56px; height: 56px;
+      border-radius: 16px;
+      background: var(--accent-dim);
+      color: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; font-weight: 800;
+    }
+    .visit-card {
+      background: var(--surface-3);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .md-content { font-size:0.85rem; color:var(--text); line-height:1.6; }
+    .md-content h1, .md-content h2, .md-content h3 { color:var(--green); margin-top:12px; margin-bottom:8px; font-size:1rem; }
+    .md-content p { margin-bottom: 8px; }
+    .md-content ul { padding-left: 20px; margin-bottom: 8px; }
+    .md-content li { margin-bottom: 4px; }
+    .md-content strong { font-weight: 700; color:var(--text); }
+  </style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<div class="portal-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-dot" style="background:var(--green);box-shadow:0 0 8px var(--green);"></span>
+      YourHealth
+    </div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="sidebar-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+      <a href="schedule.html" class="sidebar-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/></svg>My Schedule</a>
+      <a href="patients.html" class="sidebar-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>My Patients</a>
+      <a href="prescriptions.html" class="sidebar-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4M7 3h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z"/></svg>Prescriptions</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user" onclick="Auth.logout()">
+        <div class="avatar" id="user-avatar" style="background:var(--green-dim);color:var(--green);">D</div>
+        <div><div style="font-size:0.85rem;font-weight:600;" id="user-name">Doctor</div><div style="font-size:0.72rem;color:var(--text-3);">Log out</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="portal-main">
+    <header class="portal-header">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <button class="btn btn-ghost btn-sm" id="sidebar-toggle" style="padding:8px;border-radius:10px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div>
+          <div class="page-title" style="font-size:1.2rem;">My Patients</div>
+          <div class="page-subtitle">View patient history and prescriptions</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="portal-content">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:24px;" id="patients-grid">
+        <!-- JS rendered -->
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- History Modal -->
+<div id="history-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:100;align-items:center;justify-content:center;padding:20px;">
+  <div class="card-dark" style="width:100%;max-width:700px;max-height:85vh;overflow-y:auto;position:relative;animation:slide-up var(--t-base) forwards;">
+    <button onclick="closeHistoryModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text-3);font-size:1.2rem;cursor:pointer;">✖</button>
+    <div style="font-size:1.3rem;font-weight:800;margin-bottom:6px;" id="modal-patient-name">Patient Name</div>
+    <div style="font-size:0.85rem;color:var(--text-3);margin-bottom:24px;">Visit History & Prescriptions</div>
+    
+    <div id="modal-history-list">
+      <!-- JS rendered -->
+    </div>
+  </div>
+</div>
+
+<div class="toast-container"></div>
+<script src="../assets/js/api.js"></script>
+<script>
+  if (!Auth.requireRole('doctor')) {}
+  const user = Auth.user;
+  if (user) {
+    document.getElementById('user-name').textContent = user.firstName || user.name;
+    document.getElementById('user-avatar').textContent = (user.firstName?.[0] || 'D').toUpperCase();
+  }
+
+  let allAppointments = [];
+
+  async function loadPatients() {
+    try {
+      // Load both patients list and all appointments to quickly show history
+      const [patientsRes, scheduleRes] = await Promise.all([
+        api.doctor.patients(),
+        api.doctor.schedule()
+      ]);
+      const patients = patientsRes.data || [];
+      allAppointments = scheduleRes.data || [];
+      
+      renderPatients(patients);
+    } catch (err) {
+      console.error(err);
+      renderPatients([]);
+    }
+  }
+
+  function renderPatients(patients) {
+    const grid = document.getElementById('patients-grid');
+    if (!patients.length) {
+      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--text-3);background:var(--surface-2);border-radius:var(--r-xl);">
+        <div style="font-size:2.5rem;margin-bottom:12px;">🏥</div>
+        No patients found. Complete appointments to see them here.
+      </div>`;
+      return;
+    }
+    
+    // Deduplicate patients by email just in case
+    const uniquePatients = [];
+    const emails = new Set();
+    patients.forEach(p => {
+      if(p && p.email && !emails.has(p.email)) {
+        emails.add(p.email);
+        uniquePatients.push(p);
+      }
+    });
+
+    grid.innerHTML = uniquePatients.map(p => {
+      const visits = allAppointments.filter(a => a.patientEmail === p.email).length;
+      return `
+        <div class="patient-card" onclick="openHistoryModal('${p.email}', '${p.name.replace(/'/g, "\\'")}')">
+          <div style="display:flex;align-items:center;gap:16px;">
+            <div class="patient-avatar">${p.name[0].toUpperCase()}</div>
+            <div>
+              <div style="font-weight:700;font-size:1.05rem;color:var(--text);">${p.name}</div>
+              <div style="font-size:0.82rem;color:var(--text-3);">${p.email}</div>
+            </div>
+          </div>
+          <div style="border-top:1px solid var(--border);padding-top:16px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:0.85rem;color:var(--text-2);">${visits} Total Visit${visits !== 1 ? 's' : ''}</span>
+            <span style="font-size:0.85rem;font-weight:700;color:var(--accent);">View History →</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function openHistoryModal(email, name) {
+    document.getElementById('modal-patient-name').textContent = name;
+    
+    const historyList = document.getElementById('modal-history-list');
+    const patientApts = allAppointments
+      .filter(a => a.patientEmail === email)
+      .sort((a,b) => new Date(b.datetime) - new Date(a.datetime)); // Newest first
+
+    if (!patientApts.length) {
+      historyList.innerHTML = `<div style="text-align:center;color:var(--text-3);padding:20px;">No visit history found.</div>`;
+    } else {
+      historyList.innerHTML = patientApts.map(apt => {
+        const d = new Date(apt.datetime);
+        const dateStr = d.toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
+        
+        let statusBadge = '';
+        if (apt.status === 'completed') statusBadge = '<span class="badge badge-green">Completed</span>';
+        else if (apt.status === 'cancelled') statusBadge = '<span class="badge badge-red">Cancelled</span>';
+        else statusBadge = '<span class="badge badge-amber">Pending</span>';
+
+        return `
+          <div class="visit-card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+              <div style="font-weight:700;font-size:1rem;color:var(--text);">${dateStr}</div>
+              ${statusBadge}
+            </div>
+            
+            ${apt.symptoms ? `
+              <div style="margin-bottom:12px;">
+                <div style="font-size:0.75rem;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Patient Symptoms</div>
+                <div style="font-size:0.88rem;color:var(--text-2);">${apt.symptoms}</div>
+              </div>
+            ` : ''}
+            
+            ${apt.postVisitSummary ? `
+              <div style="margin-top:16px;background:var(--bg-alt);padding:12px;border-radius:var(--r-md);border-left:3px solid var(--accent);">
+                <div style="font-size:0.75rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Clinical Notes & Prescriptions</div>
+                <div class="md-content">${marked.parse(apt.postVisitSummary)}</div>
+              </div>
+            ` : (apt.status === 'completed' ? '<div style="font-size:0.85rem;color:var(--text-3);font-style:italic;">No notes recorded.</div>' : '')}
+          </div>
+        `;
+      }).join('');
+    }
+    
+    document.getElementById('history-modal').style.display = 'flex';
+  }
+
+  function closeHistoryModal() {
+    document.getElementById('history-modal').style.display = 'none';
+  }
+
+  loadPatients();
+</script>
+</body>
+</html>

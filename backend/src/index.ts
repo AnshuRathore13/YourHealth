@@ -102,7 +102,7 @@ app.use((req, res) => {
 startWorkers();
 
 app.listen(PORT, () => {
-  console.log(`\n🚀 YourHealth.AI API running on port ${PORT}`);
+  console.log(`\n🚀 YourHealth API running on port ${PORT}`);
   console.log(`   Health: http://localhost:${PORT}/api/health`);
   console.log(`   Env:    ${process.env.NODE_ENV || "development"}\n`);
 });

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Prescriptions — YourHealth.AI</title>
+  <title>My Prescriptions — YourHealth</title>
   <link rel="stylesheet" href="../assets/css/design-system.css">
   <link rel="stylesheet" href="../assets/css/portal.css">
 </head>
@@ -11,7 +11,7 @@
 <div class="sidebar-overlay" id="sidebar-overlay"></div>
 <div class="portal-layout">
   <aside class="sidebar" id="sidebar">
-    <div class="sidebar-logo"><span class="logo-dot"></span>YourHealth<span style="color:var(--accent)">.</span>AI</div>
+    <div class="sidebar-logo"><span class="logo-dot"></span>YourHealth</div>
     <nav class="sidebar-nav">
       <div class="sidebar-section-label">Patient Menu</div>
       <a href="dashboard.html" class="sidebar-item">
@@ -113,7 +113,10 @@
         <td>
           <div style="display:flex;align-items:center;gap:10px;">
             <div style="width:32px;height:32px;border-radius:10px;background:var(--green-dim);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:1.1rem;">💊</div>
-            <div style="font-weight:700;font-size:0.9rem;">${p.name}</div>
+            <div>
+              <div style="font-weight:700;font-size:0.9rem;">${p.name}</div>
+              ${p.doctorName ? `<div style="font-size:0.75rem;color:var(--text-3);margin-top:2px;">Dr. ${p.doctorName}</div>` : ''}
+            </div>
           </div>
         </td>
         <td style="font-weight:600;color:var(--text-2);">${p.dosage}</td>

@@ -1,4 +1,4 @@
--- Migration: Extend DoctorProfile and User models for YourHealth.AI v2
+-- Migration: Extend DoctorProfile and User models for YourHealth v2
 -- Run with: npx prisma db push  OR  npx prisma migrate dev --name extend_v2
 
 -- Add missing columns to DoctorProfile

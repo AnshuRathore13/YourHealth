@@ -1,4 +1,4 @@
-# Healthcare Appointment & Follow-up Manager (YourHealth.AI)
+# Healthcare Appointment & Follow-up Manager (YourHealth)
 
 A comprehensive healthcare appointment platform with dedicated portals for Patients, Doctors, and Administrators. Features AI-powered symptom analysis, clinical note translation, automated Google Calendar syncing, robust concurrency control, and asynchronous email notifications.
 

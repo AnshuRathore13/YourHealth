@@ -1,5 +1,5 @@
 /**
- * YourHealth.AI — Frontend API Client v2
+ * YourHealth — Frontend API Client v2
  * Covers all backend routes (UTH.AI + backend-extensions).
  * All methods: async, throw on HTTP error, include JWT automatically.
  * Falls back gracefully — callers catch errors and show mock data.
@@ -124,6 +124,7 @@ const api = {
     cancel:     (id, reason)  => patch(`/appointments/${id}/cancel`, { reason }),
     complete:   (id, payload) => patch(`/appointments/${id}/complete`, payload),
     reschedule: (id, payload) => patch(`/appointments/${id}/reschedule`, payload),
+    rate:       (id, rating)  => post(`/patient/appointments/${id}/rate`, { rating }),
   },
 
   // ——————————————————————————
@@ -143,6 +144,7 @@ const api = {
     schedule:    (date)          => get(`/doctor/schedule${date ? `?date=${date}` : ''}`),
     patients:    ()              => get('/doctor/patients'),
     profile:     ()              => get('/doctor/profile'),
+    updateProfile:(payload)      => patch('/doctor/profile', payload),
     submitNotes: (id, payload)   => post(`/doctor/appointments/${id}/notes`, payload),
     prescriptions:()             => get('/doctor/prescriptions'),
     // Legacy

@@ -45,18 +45,36 @@ export const generatePreVisitSummary = async (symptoms: string) => {
 
 export const generatePostVisitSummary = async (notes: string) => {
   if (!apiKey || apiKey === "placeholder") {
-    return "LLM API Key missing. Clinical notes: " + notes;
+    return JSON.stringify({
+      summary: "LLM API Key missing. Clinical notes: " + notes,
+      medication: null
+    });
   }
   
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-3.6-flash" });
-    const prompt = `Convert these clinical notes into a patient-friendly summary with medication schedule and follow-up steps: ${notes}`;
+    const prompt = `Convert these clinical notes into a patient-friendly summary with medication schedule and follow-up steps. You must return the output as a valid JSON object with two keys:
+    - "summary": A formatted string containing the patient-friendly summary.
+    - "medication": An object with "name" (tablet/medicine name), "dosage" (e.g. 500mg), "frequency" (e.g. Daily, Once daily), and "durationDays" (number, e.g. 1 if "one day", 5 if "for 5 days"). If no medication is prescribed, set it to null.
+    
+    Notes: ${notes}`;
     
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    return response.text();
+    const text = response.text();
+    
+    try {
+      const jsonStr = text.replace(/```json\n?|\n?```/g, "").trim();
+      JSON.parse(jsonStr); // validate
+      return jsonStr;
+    } catch(e) {
+      return JSON.stringify({ summary: text, medication: null });
+    }
   } catch (error) {
     console.error("Gemini API error:", error);
-    return "Failed to generate AI summary from notes: " + notes;
+    return JSON.stringify({
+      summary: "Failed to generate AI summary from notes: " + notes,
+      medication: null
+    });
   }
 };

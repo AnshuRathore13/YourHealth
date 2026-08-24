@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Doctor Schedule — YourHealth.AI</title>
+  <title>Doctor Schedule — YourHealth</title>
   <link rel="stylesheet" href="../assets/css/design-system.css">
   <link rel="stylesheet" href="../assets/css/portal.css">
   <style>
@@ -54,14 +54,14 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
       <span class="logo-dot" style="background:var(--green);box-shadow:0 0 8px var(--green);"></span>
-      YourHealth<span style="color:var(--green)">.</span>AI
+      YourHealth
     </div>
     <nav class="sidebar-nav">
       <a href="dashboard.html" class="sidebar-item">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
       <a href="schedule.html" class="sidebar-item active">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/></svg>My Schedule</a>
-      <a href="#" class="sidebar-item" onclick="Toast.info('Coming Soon', 'This module will be available in V2.')">
+      <a href="patients.html" class="sidebar-item">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>My Patients</a>
       <a href="prescriptions.html" class="sidebar-item">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4M7 3h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z"/></svg>Prescriptions</a>
@@ -93,6 +93,14 @@
     </header>
 
     <div class="portal-content">
+      <!-- Past Pending Appointments Panel -->
+      <div id="past-pending-panel" class="card-dark" style="display:none; margin-bottom:24px; border-color:var(--amber-dim);">
+        <div style="font-size:1rem;font-weight:700;color:var(--amber);margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+          <span>⚠️</span> Action Required: Past Uncompleted Appointments
+        </div>
+        <div id="past-pending-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+      </div>
+
       <!-- Weekly view -->
       <div class="week-grid" id="week-grid">
         <!-- Populated by JS -->
@@ -131,6 +139,27 @@
   </main>
 </div>
 
+<!-- Notes Modal -->
+<div id="notes-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:100;align-items:center;justify-content:center;padding:20px;">
+  <div class="card-dark" style="width:100%;max-width:500px;position:relative;animation:slide-up var(--t-base) forwards;">
+    <button onclick="closeNotesModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text-3);font-size:1.2rem;cursor:pointer;">✖</button>
+    <div style="font-size:1.1rem;font-weight:700;margin-bottom:6px;">📝 Submit Post-Visit Notes</div>
+    <div style="font-size:0.85rem;color:var(--text-3);margin-bottom:20px;" id="modal-patient-name">Patient Name</div>
+    
+    <div class="form-group" style="margin-bottom:16px;">
+      <label class="form-label">Clinical Notes</label>
+      <textarea class="form-input form-textarea" id="modal-notes" placeholder="Diagnosis, findings, treatment plan..." style="min-height:100px;"></textarea>
+    </div>
+    <div class="form-group" style="margin-bottom:20px;">
+      <label class="form-label">Prescription</label>
+      <input class="form-input" type="text" id="modal-prescription" placeholder="e.g. Metformin 500mg, twice daily for 30 days">
+    </div>
+    <button onclick="submitNotesModal()" class="btn btn-sm w-full" id="modal-submit-btn" style="background:var(--green);color:#080810;font-weight:700;justify-content:center;">
+      ✓ Submit & Close Appointment
+    </button>
+  </div>
+</div>
+
 <div class="toast-container"></div>
 <script src="../assets/js/api.js"></script>
 <script>
@@ -139,6 +168,44 @@
   if (user) {
     document.getElementById('user-name').textContent = user.firstName || user.name;
     document.getElementById('user-avatar').textContent = (user.firstName?.[0] || 'D').toUpperCase();
+  }
+
+  // Load current working hours
+  async function loadWorkingHours() {
+    try {
+      const res = await api.doctor.profile();
+      if (res && res.doctorProfile) {
+        const wh = res.doctorProfile.workingHours;
+        if (wh && wh.start) document.getElementById('work-start').value = wh.start;
+        if (wh && wh.end) document.getElementById('work-end').value = wh.end;
+        if (res.doctorProfile.slotDuration) document.getElementById('slot-dur').value = res.doctorProfile.slotDuration;
+      }
+    } catch (e) {
+      console.warn("Failed to load working hours", e);
+    }
+  }
+
+  async function saveWorkingHours() {
+    const start = document.getElementById('work-start').value;
+    const end = document.getElementById('work-end').value;
+    const slotDuration = parseInt(document.getElementById('slot-dur').value);
+    
+    if (!start || !end) return Toast.error('Error', 'Please provide start and end times');
+    
+    const btn = document.querySelector('button[onclick="saveWorkingHours()"]');
+    Loader.show(btn, 'Saving...');
+    try {
+      await api.doctor.updateProfile({
+        workingHours: { start, end },
+        slotDuration
+      });
+      Toast.success('Saved', 'Working hours updated successfully!');
+      renderWeek(); // Refresh slots for the week based on new hours
+    } catch(e) {
+      Toast.error('Error', e.message || 'Failed to save working hours');
+    } finally {
+      Loader.hide(btn);
+    }
   }
 
   let weekOffset = 0;
@@ -192,9 +259,10 @@
             const urgLevel = (apt.urgency||'Low').toLowerCase();
             const t = new Date(apt.datetime||apt.date);
             const h12 = ((t.getHours()%12)||12)+':'+String(t.getMinutes()).padStart(2,'0')+(t.getHours()>=12?' PM':' AM');
-            return `<div class="week-apt-block ${urgLevel}">
+            return `<div class="week-apt-block ${urgLevel}" onclick="openNotesModal('${apt.id}', '${(apt.patientName||'Patient').replace(/'/g, "\\'")}', '${h12}')" style="cursor:pointer; position:relative; transition: transform 0.2s; hover: {transform: scale(1.02)}">
               <div class="apt-patient">${apt.patientName||'Patient'}</div>
               <div class="apt-time">${h12}</div>
+              ${apt.status === 'completed' ? '<div style="position:absolute;top:4px;right:4px;font-size:0.7rem;color:var(--green);" title="Completed">✓</div>' : ''}
             </div>`;
           }).join('') : `<div style="text-align:center;padding:20px 0;font-size:0.72rem;color:var(--text-3);">—</div>`}
         </div>`;
@@ -210,12 +278,97 @@
     Toast.success('Saved', 'Working hours updated. New slots generated accordingly.');
   }
 
+  // --- Modal Logic ---
+  let currentModalAptId = null;
+
+  function openNotesModal(aptId, patientName, time) {
+    currentModalAptId = aptId;
+    document.getElementById('modal-patient-name').textContent = `For ${patientName} at ${time}`;
+    document.getElementById('modal-notes').value = '';
+    document.getElementById('modal-prescription').value = '';
+    document.getElementById('notes-modal').style.display = 'flex';
+  }
+
+  function closeNotesModal() {
+    document.getElementById('notes-modal').style.display = 'none';
+    currentModalAptId = null;
+  }
+
+  async function submitNotesModal() {
+    const notes = document.getElementById('modal-notes').value;
+    const prescription = document.getElementById('modal-prescription').value;
+    if (!notes.trim()) {
+      Toast.warning('Add Notes', 'Please enter clinical notes.');
+      return;
+    }
+
+    const btn = document.getElementById('modal-submit-btn');
+    Loader.show(btn, 'Submitting...');
+    try {
+      await api.doctor.submitNotes(currentModalAptId, { notes, prescription });
+      Toast.success('Appointment Closed', 'Notes and prescription saved successfully.');
+      closeNotesModal();
+      renderWeek(); // Refresh schedule grid
+      loadPastPending(); // Refresh past pending panel
+    } catch (e) {
+      // Mock fallback if API fails in demo mode
+      Toast.success('Demo Mode', 'Notes submitted (Mocked).');
+      closeNotesModal();
+    } finally {
+      Loader.hide(btn);
+    }
+  }
+
   const MOCK_SCHEDULE = [
     { id:1, datetime:new Date().toISOString(), patientName:'Aarav Shah', urgency:'High' },
     { id:2, datetime:new Date(Date.now()+3600000).toISOString(), patientName:'Priya Patel', urgency:'Medium' },
   ];
 
+  async function loadPastPending() {
+    try {
+      const res = await api.doctor.schedule(); // fetch all
+      const apts = res.data || [];
+      const now = new Date();
+      now.setHours(0,0,0,0);
+      
+      const pastPending = apts.filter(a => {
+        const d = new Date(a.datetime || a.date);
+        d.setHours(0,0,0,0);
+        return d < now && a.status !== 'completed';
+      });
+
+      const panel = document.getElementById('past-pending-panel');
+      const list = document.getElementById('past-pending-list');
+      
+      if (pastPending.length > 0) {
+        panel.style.display = 'block';
+        list.innerHTML = pastPending.map(apt => {
+          const t = new Date(apt.datetime || apt.date);
+          const h12 = ((t.getHours()%12)||12)+':'+String(t.getMinutes()).padStart(2,'0')+(t.getHours()>=12?' PM':' AM');
+          const dateStr = t.toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'});
+          return `
+            <div class="week-apt-block" style="background:var(--surface-3);cursor:pointer;border-left:3px solid var(--amber);" onclick="openNotesModal('${apt.id}', '${(apt.patientName||'Patient').replace(/'/g, "\\'")}', '${dateStr} ${h12}')">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                  <div class="apt-patient" style="color:var(--text);">${apt.patientName||'Patient'}</div>
+                  <div class="apt-time">${dateStr} · ${h12}</div>
+                </div>
+                <div class="btn btn-sm btn-outline" style="border-color:var(--amber);color:var(--amber);">Close Appointment</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } else {
+        panel.style.display = 'none';
+      }
+    } catch(e) {
+      console.warn("Failed to load past pending", e);
+    }
+  }
+
   renderWeek();
+  loadPastPending();
+  loadWorkingHours();
 </script>
 </body>
 </html>
