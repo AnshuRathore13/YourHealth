@@ -109,7 +109,7 @@ router.post("/appointments/:id/notes", authenticate, requireRole(["DOCTOR"]), as
   try {
     const { notes, prescription, prescriptionFrequencyDays } = req.body;
     const doctorId = req.user!.id;
-    const appointmentId = req.params.id;
+    const appointmentId = (req.params.id as string);
 
     const apt = await prisma.appointment.findUnique({ where: { id: appointmentId } });
     if (!apt || apt.doctorId !== doctorId) {

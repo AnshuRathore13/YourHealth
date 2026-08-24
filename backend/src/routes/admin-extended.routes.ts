@@ -107,12 +107,12 @@ router.put("/doctors/:id", authenticate, requireRole(["ADMIN"]), async (req, res
     const { name, specialisation, slotDuration, fee, experience, workStart, workEnd, bio } = req.body;
 
     await prisma.user.update({
-      where: { id: req.params.id },
+      where: { id: (req.params.id as string) },
       data: { name }
     });
 
     await prisma.doctorProfile.update({
-      where: { userId: req.params.id },
+      where: { userId: (req.params.id as string) },
       data: {
         specialization: specialisation,
         slotDuration:   slotDuration,
@@ -133,12 +133,12 @@ router.delete("/doctors/:id", authenticate, requireRole(["ADMIN"]), async (req, 
   try {
     // Cancel all future appointments first
     await prisma.appointment.updateMany({
-      where: { doctorId: req.params.id, status: { in: ["CONFIRMED", "PENDING"] } },
+      where: { doctorId: (req.params.id as string), status: { in: ["CONFIRMED", "PENDING"] } },
       data:  { status: "CANCELLED" }
     });
     // Delete doctor profile + user
-    await prisma.doctorProfile.delete({ where: { userId: req.params.id } });
-    await prisma.user.delete({ where: { id: req.params.id } });
+    await prisma.doctorProfile.delete({ where: { userId: (req.params.id as string) } });
+    await prisma.user.delete({ where: { id: (req.params.id as string) } });
 
     res.json({ message: "Doctor deleted" });
   } catch (error) {

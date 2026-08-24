@@ -50,7 +50,7 @@ router.get("/", async (req, res): Promise<void> => {
 router.get("/:id", async (req, res): Promise<void> => {
   try {
     const doctor = await prisma.doctorProfile.findUnique({
-      where: { userId: req.params.id },
+      where: { userId: (req.params.id as string) },
       include: { user: { select: { id: true, name: true, email: true } } }
     });
     if (!doctor) { res.status(404).json({ error: "Doctor not found" }); return; }
@@ -66,7 +66,7 @@ router.get("/:id", async (req, res): Promise<void> => {
 router.get("/:id/availability", async (req, res): Promise<void> => {
   try {
     const { date } = req.query;
-    const doctorId = req.params.id;
+    const doctorId = (req.params.id as string);
 
     if (!date) { res.status(400).json({ error: "date query param required" }); return; }
 
@@ -93,7 +93,7 @@ router.get("/:id/availability", async (req, res): Promise<void> => {
       .map(a => a.timeSlot);
 
     const wh = doctor.workingHours as any;
-    const slots: { time: string; booked: boolean }[] = [];
+    const slots: { time: string; booked: boolean; passed?: boolean }[] = [];
 
     if (wh?.start && wh?.end) {
       let cur = new Date(`1970-01-01T${wh.start}:00Z`).getTime();
@@ -133,7 +133,7 @@ router.get("/:id/availability", async (req, res): Promise<void> => {
 router.post("/:id/leave", authenticate, async (req: AuthRequest, res): Promise<void> => {
   try {
     const { dates } = req.body; // array of YYYY-MM-DD strings
-    const doctorId = req.params.id;
+    const doctorId = (req.params.id as string);
 
     const doctor = await prisma.doctorProfile.findUnique({ where: { userId: doctorId } });
     if (!doctor) { res.status(404).json({ error: "Doctor not found" }); return; }

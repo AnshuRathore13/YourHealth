@@ -138,7 +138,7 @@ router.get("/profile", authenticate, requireRole(["PATIENT"]), async (req: AuthR
 // ——————————————————————————————————————
 router.post("/appointments/:id/rate", authenticate, requireRole(["PATIENT"]), async (req: AuthRequest, res): Promise<any> => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const ratingStr = req.body?.rating;
     
     if (!ratingStr || isNaN(Number(ratingStr))) {
@@ -150,7 +150,7 @@ router.post("/appointments/:id/rate", authenticate, requireRole(["PATIENT"]), as
       return res.status(400).json({ error: "Rating must be between 1 and 5" });
     }
 
-    const apt = await prisma.appointment.findUnique({
+    const apt = await prisma.appointment.findFirst({
       where: { id, patientId: req.user!.id },
       include: { doctor: { include: { doctorProfile: true } } }
     });

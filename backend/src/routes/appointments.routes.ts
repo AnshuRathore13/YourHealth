@@ -31,11 +31,7 @@ router.get("/", authenticate, async (req: AuthRequest, res): Promise<void> => {
       where,
       include: {
         patient: { select: { id: true, name: true, email: true } },
-        doctor:  {
-          include: {
-            user: { select: { id: true, name: true, email: true } }
-          }
-        }
+        doctor:  { select: { id: true, name: true, email: true } }
       },
       orderBy: [{ appointmentDate: "asc" }, { timeSlot: "asc" }],
       take:   parseInt(limit as string),
@@ -55,10 +51,10 @@ router.get("/", authenticate, async (req: AuthRequest, res): Promise<void> => {
 router.get("/:id", authenticate, async (req: AuthRequest, res): Promise<void> => {
   try {
     const apt = await prisma.appointment.findUnique({
-      where: { id: req.params.id },
+      where: { id: (req.params.id as string) },
       include: {
         patient: { select: { id: true, name: true, email: true } },
-        doctor:  { include: { user: { select: { name: true, email: true } } } }
+        doctor:  { select: { id: true, name: true, email: true } }
       }
     });
     if (!apt) { res.status(404).json({ error: "Appointment not found" }); return; }
@@ -151,7 +147,7 @@ router.patch("/:id/cancel", authenticate, async (req: AuthRequest, res): Promise
   try {
     const { reason } = req.body;
     const apt = await prisma.appointment.update({
-      where: { id: req.params.id },
+      where: { id: (req.params.id as string) },
       data:  { status: "CANCELLED" }
     });
 
@@ -183,7 +179,7 @@ router.patch("/:id/complete", authenticate, requireRole(["DOCTOR"]), async (req:
     const patientSummary = await generatePostVisitSummary(notes + (prescription ? `. Prescription: ${prescription}` : ""));
 
     const apt = await prisma.appointment.update({
-      where: { id: req.params.id },
+      where: { id: (req.params.id as string) },
       data: {
         status: "COMPLETED",
         postVisitNotes: notes,
@@ -209,7 +205,7 @@ router.patch("/:id/reschedule", authenticate, async (req: AuthRequest, res): Pro
   try {
     const { date, time } = req.body;
     const apt = await prisma.appointment.update({
-      where: { id: req.params.id },
+      where: { id: (req.params.id as string) },
       data: { appointmentDate: date, timeSlot: time, status: "CONFIRMED" }
     });
 
