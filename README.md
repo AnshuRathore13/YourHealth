@@ -61,7 +61,7 @@ To enable automated calendar event creation for bookings:
 
 ---
 
-## 🤖 LLM Prompts Used
+##  LLM Prompts Used
 
 The platform uses Google's Gemini-3.6-Flash model for medical text processing.
 
